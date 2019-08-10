@@ -46,16 +46,16 @@ form {
   display: inline-block;
   text-align: left;
   border-radius: 6px;
-  border-left: 2px solid #4caf50;
-  border-right: 2px solid #4caf50;
-  border-top: 2px solid #666363e3;
-  border-bottom: 2px solid #666363e3;
-  margin: 5;
+  border-left: 4px solid #4caf50;
+  border-right: 4px solid #4caf50;
+  border-top: 4px solid #666363e3;
+  border-bottom: 4px solid #666363e3;
+  margin: 10px;
 }
 
 #stats-box2 {
-  border-left: 2px solid #d63012;
-  border-right: 2px solid #d63012;
+  border-left: 4px solid #d63012;
+  border-right: 4px solid #d63012;
   display: inline-block;
 }
 

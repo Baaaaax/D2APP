@@ -6,6 +6,7 @@ import StatBoxs from "./Components/StatBoxs";
 
 class App extends Component {
   state = {
+    isLoading: false,
     firstInputValue: "",
     secondInputValue: "",
     firstMembershipId: "",
@@ -25,8 +26,11 @@ class App extends Component {
           onFInputChange={this.onFInputChange}
           onSInputChange={this.onSInputChange}
           handleClickFetch={this.handleClickFetch}
+          isLoading={this.state.isLoading}
         />
-        <StatBoxs />
+        {this.state.matchesToShow.length > 1 && (
+          <StatBoxs matchesToShow={this.state.matchesToShow} />
+        )}
       </div>
     );
   }
@@ -140,8 +144,7 @@ class App extends Component {
         }
       }
     });
-
-    console.log(standingValue);
+    this.setState({ isLoading: false });
   };
 
   onFInputChange = e => {
@@ -152,13 +155,14 @@ class App extends Component {
   };
 
   handleClickFetch = () => {
-    const settings = {
+    var settings = {
       method: "GET",
       headers: {
         "x-api-key": "cc8fc21c337a4399b94e9e11e7d908b8"
       }
     };
 
+    this.setState({ isLoading: true });
     this.getMembershipsId("bax#21629", "lightning#23190", settings);
   };
 }

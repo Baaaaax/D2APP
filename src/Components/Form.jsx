@@ -31,7 +31,8 @@ class Form extends Component {
             className="btn btn-success btn-md"
             onClick={this.props.handleClickFetch}
           >
-            succc
+            {this.props.isLoading && <span>Loading..</span>}
+            {!this.props.isLoading && <span>Go!</span>}
           </button>
         </form>
 
