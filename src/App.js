@@ -15,7 +15,9 @@ class App extends Component {
     characterIds: [],
     activitiesList: [{}],
     matchEntryPGCR: [{}],
-    matchesToShow: [{}]
+    matchesToShow: [{}],
+    selectedRadioBtn: "50",
+    shouldShowErrorMatchesFound: false
   };
 
   render() {
@@ -27,10 +29,13 @@ class App extends Component {
           onSInputChange={this.onSInputChange}
           handleClickFetch={this.handleClickFetch}
           isLoading={this.state.isLoading}
+          selectedRadioBtn={this.selectedRadioBtn}
+          onRadioBtnChange={this.onRadioBtnChange}
         />
         {this.state.matchesToShow.length > 1 && (
           <StatBoxs matchesToShow={this.state.matchesToShow} />
         )}
+        {this.state.shouldShowErrorMatchesFound && <h2>No matches found...</h2>}
       </div>
     );
   }
@@ -90,7 +95,9 @@ class App extends Component {
       this.state.firstMembershipId +
       "/Character/" +
       this.state.characterIds[0] +
-      "/Stats/Activities/?count=100&mode=32";
+      "/Stats/Activities/?count=" +
+      this.state.selectedRadioBtn +
+      "&mode=32";
 
     const response = await fetch(fetchUrl, settings);
     const data = await response.json();
@@ -154,6 +161,16 @@ class App extends Component {
     this.setState({ secondInputValue: e.target.value });
   };
 
+  onRadioBtnChange = e => {
+    this.setState({ selectedRadioBtn: e.target.value });
+  };
+
+  shouldShowError = () => {
+    setTimeout(() => {
+      this.setState({ shouldShowErrorMatchesFound: true });
+    }, 2000);
+  };
+
   handleClickFetch = () => {
     var settings = {
       method: "GET",
@@ -164,6 +181,7 @@ class App extends Component {
 
     this.setState({ isLoading: true });
     this.getMembershipsId("bax#21629", "lightning#23190", settings);
+    this.shouldShowError();
   };
 }
 
