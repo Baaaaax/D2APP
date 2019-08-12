@@ -18,15 +18,9 @@
   margin-top: 13px;
 }
 
-.container {
-  text-align: center;
+.container-fluid {
+  max-width: 75%;
 }
-
-.container-left {
-  text-align: center;
-  padding: 40px;
-}
-
 form {
   text-align: center;
 }
@@ -41,10 +35,8 @@ form {
 }
 
 .stats-box {
-  width: 45%;
   background-color: #282828;
-  display: inline-block;
-  text-align: left;
+
   border-radius: 6px;
   border-left: 4px solid #4caf50;
   border-right: 4px solid #4caf50;
@@ -53,14 +45,12 @@ form {
   margin: 10px;
 }
 
-#stats-box2 {
-  border-left: 4px solid #d63012;
-  border-right: 4px solid #d63012;
-  display: inline-block;
-}
-
 .match-list {
   padding: 10;
+}
+
+.details {
+  display: inline-block;
 }
 
 .title {
@@ -68,6 +58,7 @@ form {
   display: block;
   text-decoration: none;
   color: #ededed;
+  max-width: 300px;
 }
 
 :hover .title {
@@ -79,4 +70,31 @@ form {
   color: #ededed;
   opacity: 0.54;
   text-overflow: ellipsis;
+}
+
+.stats {
+  color: #ededed;
+}
+
+.row {
+  color: #ededed;
+  margin-bottom: 9px;
+}
+
+.sb-con {
+  max-width: 35%;
+}
+
+.marginMLRow {
+  margin-bottom: 11px;
+  margin-left: auto;
+}
+
+.marginNameStatsRow {
+  margin-bottom: 3px;
+}
+@media only screen and (max-width: 830px) {
+  .sb-con {
+    max-width: 260px;
+  }
 }

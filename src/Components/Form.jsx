@@ -7,6 +7,8 @@ const Form = props => {
     onSInputChange,
     secondInputValue,
     handleClickFetch,
+    handleClickNextPage,
+    hasFoundResults,
     isLoading,
     selectedRadioBtn,
     onRadioBtnChange
@@ -44,6 +46,16 @@ const Form = props => {
         >
           {isLoading && <span>Loading..</span>}
           {!isLoading && <span>Go!</span>}
+        </button>
+        <button
+          type="button"
+          id="nextPageBtn"
+          className="btn btn-info btn-md"
+          onClick={handleClickNextPage}
+          disabled={hasFoundResults}
+        >
+          {isLoading && <span>Loading..</span>}
+          {!isLoading && <span>Next page</span>}
         </button>
       </form>
 

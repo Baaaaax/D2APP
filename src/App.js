@@ -17,7 +17,9 @@ class App extends Component {
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
     selectedRadioBtn: "50",
-    shouldShowErrorMatchesFound: false
+    noMatchFoundBool: false,
+    currentPage: 0,
+    hasFoundResults: false
   };
 
   render() {
@@ -28,14 +30,21 @@ class App extends Component {
           onFInputChange={this.onFInputChange}
           onSInputChange={this.onSInputChange}
           handleClickFetch={this.handleClickFetch}
+          handleClickNextPage={this.handleClickNextPage}
           isLoading={this.state.isLoading}
+          hasFoundResults={this.state.hasFoundResults}
           selectedRadioBtn={this.selectedRadioBtn}
           onRadioBtnChange={this.onRadioBtnChange}
         />
         {this.state.matchesToShow.length > 1 && (
-          <StatBoxs matchesToShow={this.state.matchesToShow} />
+          <StatBoxs
+            matchesToShow={this.state.matchesToShow}
+            firstMembershipId={this.state.firstMembershipId}
+            secondMembershipId={this.state.secondMembershipId}
+          />
         )}
-        {this.state.shouldShowErrorMatchesFound && <h2>No matches found...</h2>}
+        {this.state.matchesToShow.length <= 1 &&
+          this.state.noMatchFoundBool && <h2>No matches found...</h2>}
       </div>
     );
   }
@@ -97,7 +106,8 @@ class App extends Component {
       this.state.characterIds[0] +
       "/Stats/Activities/?count=" +
       this.state.selectedRadioBtn +
-      "&mode=32";
+      "&mode=32&page=" +
+      this.state.currentPage;
 
     const response = await fetch(fetchUrl, settings);
     const data = await response.json();
@@ -148,9 +158,11 @@ class App extends Component {
               copyArr[copyArr.length - 1]
             ]
           }));
+          this.setState({ hasFoundResults: true });
         }
       }
     });
+    this.timeOutNoMatchFoundBool();
     this.setState({ isLoading: false });
   };
 
@@ -165,10 +177,22 @@ class App extends Component {
     this.setState({ selectedRadioBtn: e.target.value });
   };
 
-  shouldShowError = () => {
-    setTimeout(() => {
-      this.setState({ shouldShowErrorMatchesFound: true });
-    }, 2000);
+  timeOutNoMatchFoundBool = () => {
+    if (this.state.selectedRadioBtn == "50") {
+      setTimeout(() => {
+        this.setState({ noMatchFoundBool: true });
+      }, 3000);
+    }
+    if (this.state.selectedRadioBtn == "100") {
+      setTimeout(() => {
+        this.setState({ noMatchFoundBool: true });
+      }, 7000);
+    }
+    if (this.state.selectedRadioBtn == "200") {
+      setTimeout(() => {
+        this.setState({ noMatchFoundBool: true });
+      }, 8000);
+    }
   };
 
   handleClickFetch = () => {
@@ -180,8 +204,20 @@ class App extends Component {
     };
 
     this.setState({ isLoading: true });
-    this.getMembershipsId("bax#21629", "lightning#23190", settings);
-    this.shouldShowError();
+
+    this.getMembershipsId("bax#21629", "lightning#23190", settings); //"auriel#21174"
+  };
+
+  handleClickNextPage = () => {
+    var settings = {
+      method: "GET",
+      headers: {
+        "x-api-key": "cc8fc21c337a4399b94e9e11e7d908b8"
+      }
+    };
+    this.setState({ isLoading: true });
+    this.getActivityHistory();
+    this.setState({ currentPage: (this.state.currentPage += 1) });
   };
 }
 
