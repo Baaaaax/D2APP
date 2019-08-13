@@ -28,41 +28,41 @@ class MatchEntry extends Component {
             {this.decodeMap(matchMode)}
           </a>
         </div>
-        <div class="col">
+        <div className="col">
           <span>{this.formatDate(matchDate)}</span>
         </div>
-        <div class="w-100 marginNameStatsRow" />
+        <div className="w-100 marginNameStatsRow" />
 
         <div className="col">
-          <div class="row align-items-end">
-            <div class="col">
+          <div className="row align-items-end">
+            <div className="col">
               <span>KD</span>
             </div>
-            <div class="col">
+            <div className="col">
               <span>KDA</span>
             </div>
-            <div class="col">
+            <div className="col">
               <span>KILL</span>
             </div>
-            <div class="col">
+            <div className="col">
               <span>DEATH</span>
             </div>
           </div>
         </div>
-        <div class="w-100" />
+        <div className="w-100" />
 
         <div className="col">
           <div className="row align-items-end">
-            <div class="col">
+            <div className="col">
               <span>{this.getStats(matchPlayers, firstMembershipId, 0)}</span>
             </div>
-            <div class="col">
+            <div className="col">
               <span>{this.getStats(matchPlayers, firstMembershipId, 1)}</span>
             </div>
-            <div class="col">
+            <div className="col">
               <span>{this.getStats(matchPlayers, firstMembershipId, 2)}</span>
             </div>
-            <div class="col">
+            <div className="col">
               <span>{this.getStats(matchPlayers, firstMembershipId, 3)}</span>
             </div>
           </div>
@@ -123,7 +123,7 @@ class MatchEntry extends Component {
       "Control - Competitive": 74
     };
     for (var i in codedModeList) {
-      if (codedModeList[i] == mode) {
+      if (codedModeList[i] === mode) {
         return i;
       }
     }

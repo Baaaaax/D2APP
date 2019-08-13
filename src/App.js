@@ -16,35 +16,65 @@ class App extends Component {
     activitiesList: [{}],
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
-    selectedRadioBtn: "50",
+    selectedRadioBtn: "27",
     noMatchFoundBool: false,
     currentPage: 0,
-    hasFoundResults: false
+    hasFoundResults: false,
+    isUpdating: false
   };
 
   render() {
     return (
-      <div className="App">
-        <Logo />
-        <Form
-          onFInputChange={this.onFInputChange}
-          onSInputChange={this.onSInputChange}
-          handleClickFetch={this.handleClickFetch}
-          handleClickNextPage={this.handleClickNextPage}
-          isLoading={this.state.isLoading}
-          hasFoundResults={this.state.hasFoundResults}
-          selectedRadioBtn={this.selectedRadioBtn}
-          onRadioBtnChange={this.onRadioBtnChange}
-        />
-        {this.state.matchesToShow.length > 1 && (
-          <StatBoxs
-            matchesToShow={this.state.matchesToShow}
-            firstMembershipId={this.state.firstMembershipId}
-            secondMembershipId={this.state.secondMembershipId}
-          />
-        )}
-        {this.state.matchesToShow.length <= 1 &&
-          this.state.noMatchFoundBool && <h2>No matches found...</h2>}
+      <div>
+        <div className="wrapper min-width-container">
+          <div
+            className="main"
+            style={{ "min-width": "1024px", "min-height": "600px" }}
+          >
+            <div
+              className="container"
+              style={{ "min-width": "1024px", "min-height": "600px" }}
+            >
+              <div
+                className="row"
+                style={{ " min-width": "1024px", "min-height": "600px" }}
+              >
+                <div
+                  className="col-5 title-container"
+                  style={{ " min-width": "1024px", "min-height": "600px" }}
+                >
+                  <Logo />
+                </div>
+                <div
+                  className="col-7 form-container"
+                  style={{ " min-width": "1024px", "min-height": "600px" }}
+                >
+                  <Form
+                    onFInputChange={this.onFInputChange}
+                    onSInputChange={this.onSInputChange}
+                    handleClickFetch={this.handleClickFetch}
+                    handleClickNextPage={this.handleClickNextPage}
+                    isLoading={this.state.isLoading}
+                    hasFoundResults={this.state.hasFoundResults}
+                    selectedRadioBtn={this.selectedRadioBtn}
+                    onRadioBtnChange={this.onRadioBtnChange}
+                  />
+
+                  {this.state.matchesToShow.length > 1 && (
+                    <StatBoxs
+                      matchesToShow={this.state.matchesToShow}
+                      firstMembershipId={this.state.firstMembershipId}
+                      secondMembershipId={this.state.secondMembershipId}
+                    />
+                  )}
+                  {this.state.matchesToShow.length <= 1 &&
+                    this.state.noMatchFoundBool &&
+                    !this.state.isUpdating && <h2>No matches found...</h2>}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -113,10 +143,13 @@ class App extends Component {
     const data = await response.json();
 
     console.log(data);
-    this.setState({ activitiesList: data.Response.activities });
-    this.state.activitiesList.forEach(e => {
-      this.getPostGameCarnageReport(e.activityDetails.instanceId, settings);
-    });
+    if (data) {
+      this.setState({ isUpdating: false });
+      this.setState({ activitiesList: data.Response.activities });
+      this.state.activitiesList.forEach(e => {
+        this.getPostGameCarnageReport(e.activityDetails.instanceId, settings);
+      });
+    }
   };
 
   getPostGameCarnageReport = async (activityId, settings) => {
@@ -178,17 +211,17 @@ class App extends Component {
   };
 
   timeOutNoMatchFoundBool = () => {
-    if (this.state.selectedRadioBtn == "50") {
+    if (this.state.selectedRadioBtn === "50") {
       setTimeout(() => {
         this.setState({ noMatchFoundBool: true });
       }, 3000);
     }
-    if (this.state.selectedRadioBtn == "100") {
+    if (this.state.selectedRadioBtn === "100") {
       setTimeout(() => {
         this.setState({ noMatchFoundBool: true });
       }, 7000);
     }
-    if (this.state.selectedRadioBtn == "200") {
+    if (this.state.selectedRadioBtn === "200") {
       setTimeout(() => {
         this.setState({ noMatchFoundBool: true });
       }, 8000);
@@ -204,6 +237,9 @@ class App extends Component {
     };
 
     this.setState({ isLoading: true });
+    this.setState({ currentPage: 0 });
+    this.setState({ matchesToShow: [{}] });
+    this.setState({ matchEntryPGCR: [{}] });
 
     this.getMembershipsId("bax#21629", "lightning#23190", settings); //"auriel#21174"
   };
@@ -216,8 +252,12 @@ class App extends Component {
       }
     };
     this.setState({ isLoading: true });
-    this.getActivityHistory();
-    this.setState({ currentPage: (this.state.currentPage += 1) });
+    this.setState({ noMatchFoundBool: false });
+    this.setState({ isUpdating: true });
+    this.setState({ matchesToShow: [{}] });
+    this.setState({ matchEntryPGCR: [{}] });
+    this.getActivityHistory(settings);
+    this.setState({ currentPage: this.state.currentPage + 1 });
   };
 }
 

@@ -17,26 +17,19 @@ const Form = props => {
   return (
     <React.Fragment>
       <form>
-        <div className="form-row">
-          <div className="col">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="First name"
-              value={firstInputValue}
-              onChange={onFInputChange}
-            />
-          </div>
-          <div className="col">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Last name"
-              onChange={onSInputChange}
-              value={secondInputValue}
-            />
-          </div>
-        </div>
+        <input
+          type="text"
+          placeholder="First Username.."
+          value={firstInputValue}
+          onChange={onFInputChange}
+        />
+        <input
+          type="text"
+          placeholder="Second Username.."
+          onChange={onSInputChange}
+          value={secondInputValue}
+        />
+
         <button
           type="button"
           id="submitBtn"
@@ -52,57 +45,65 @@ const Form = props => {
           id="nextPageBtn"
           className="btn btn-info btn-md"
           onClick={handleClickNextPage}
-          disabled={hasFoundResults}
+          disabled={!hasFoundResults}
         >
           {isLoading && <span>Loading..</span>}
           {!isLoading && <span>Next page</span>}
         </button>
+        <div className="inputContainer">
+          <div className="custom-control custom-radio custom-control-inline">
+            <input
+              type="radio"
+              id="customRadioInline1"
+              name="customRadioInline1"
+              className="custom-control-input"
+              value="50"
+              onChange={onRadioBtnChange}
+              checked={selectedRadioBtn === "50"}
+            />
+            <label
+              className="custom-control-label"
+              htmlFor="customRadioInline1"
+            >
+              50
+            </label>
+          </div>
+          <div className="custom-control custom-radio custom-control-inline">
+            <input
+              type="radio"
+              id="customRadioInline2"
+              name="customRadioInline1"
+              className="custom-control-input"
+              value="100"
+              onChange={onRadioBtnChange}
+              checked={selectedRadioBtn === "100"}
+            />
+            <label
+              className="custom-control-label"
+              htmlFor="customRadioInline2"
+            >
+              100
+            </label>
+          </div>
+          <div className="custom-control custom-radio custom-control-inline">
+            <input
+              type="radio"
+              id="customRadioInline3"
+              name="customRadioInline1"
+              className="custom-control-input"
+              value="200"
+              onChange={onRadioBtnChange}
+              checked={selectedRadioBtn === "200"}
+            />
+            <label
+              className="custom-control-label"
+              htmlFor="customRadioInline3"
+            >
+              200
+            </label>
+          </div>
+        </div>
       </form>
-
-      <div className="inputContainer">
-        <div className="custom-control custom-radio custom-control-inline">
-          <input
-            type="radio"
-            id="customRadioInline1"
-            name="customRadioInline1"
-            className="custom-control-input"
-            value="50"
-            onChange={onRadioBtnChange}
-            checked={selectedRadioBtn === "50"}
-          />
-          <label className="custom-control-label" htmlFor="customRadioInline1">
-            50
-          </label>
-        </div>
-        <div className="custom-control custom-radio custom-control-inline">
-          <input
-            type="radio"
-            id="customRadioInline2"
-            name="customRadioInline1"
-            className="custom-control-input"
-            value="100"
-            onChange={onRadioBtnChange}
-            checked={selectedRadioBtn === "100"}
-          />
-          <label className="custom-control-label" htmlFor="customRadioInline2">
-            100
-          </label>
-        </div>
-        <div className="custom-control custom-radio custom-control-inline">
-          <input
-            type="radio"
-            id="customRadioInline3"
-            name="customRadioInline1"
-            className="custom-control-input"
-            value="200"
-            onChange={onRadioBtnChange}
-            checked={selectedRadioBtn === "200"}
-          />
-          <label className="custom-control-label" htmlFor="customRadioInline3">
-            200
-          </label>
-        </div>
-      </div>
     </React.Fragment>
   );
 };
