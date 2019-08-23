@@ -109,7 +109,7 @@ input[type="text"] {
   border-top: 4px solid #666363e3;
   border-bottom: 4px solid #666363e3;
   margin-top: 20px;
-  margin-right: 15px;
+  margin-left: -8px;
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -156,9 +156,4 @@ input[type="text"] {
 
 .marginNameStatsRow {
   margin-bottom: 3px;
-}
-
-.min-width-container {
-  min-width: 1265px;
-  min-height: 547px;
 }

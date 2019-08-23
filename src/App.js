@@ -16,7 +16,7 @@ class App extends Component {
     activitiesList: [{}],
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
-    selectedRadioBtn: "27",
+    selectedRadioBtn: "7",
     noMatchFoundBool: false,
     currentPage: 0,
     hasFoundResults: false,
@@ -27,28 +27,13 @@ class App extends Component {
     return (
       <div>
         <div className="wrapper min-width-container">
-          <div
-            className="main"
-            style={{ "min-width": "1024px", "min-height": "600px" }}
-          >
-            <div
-              className="container"
-              style={{ "min-width": "1024px", "min-height": "600px" }}
-            >
-              <div
-                className="row"
-                style={{ " min-width": "1024px", "min-height": "600px" }}
-              >
-                <div
-                  className="col-5 title-container"
-                  style={{ " min-width": "1024px", "min-height": "600px" }}
-                >
+          <div className="main">
+            <div className="container">
+              <div className="row">
+                <div className="col-5 title-container">
                   <Logo />
                 </div>
-                <div
-                  className="col-7 form-container"
-                  style={{ " min-width": "1024px", "min-height": "600px" }}
-                >
+                <div className="col-7 form-container">
                   <Form
                     onFInputChange={this.onFInputChange}
                     onSInputChange={this.onSInputChange}

@@ -2,12 +2,13 @@ import React, { Component } from "react";
 import MatchEntry from "./MatchEntry";
 
 class StatBoxs extends Component {
+  state = {
+    threeMatchesArr: []
+  };
+
   render() {
     return (
-      <div
-        className="container stats-box"
-        style={{ "min-width": "547px", "min-height": "300px" }}
-      >
+      <div className="container stats-box" style={{ "min-width": "300px" }}>
         {this.props.matchesToShow
           .filter(e => Object.getOwnPropertyNames(e).length !== 0)
           .map(e => (
