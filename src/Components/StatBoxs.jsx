@@ -2,11 +2,12 @@ import React, { Component } from "react";
 import MatchEntry from "./MatchEntry";
 
 class StatBoxs extends Component {
-  state = {};
+  state = {
+    matchesToShowIndexes: [0, 3]
+  };
 
   render() {
     const {
-      handleClickNextPage,
       isLoading,
       matchesToShow,
       firstMembershipId,
@@ -19,17 +20,19 @@ class StatBoxs extends Component {
             type="button"
             id="nextPageBtn"
             className="btn btn-info btn-md"
-            onClick={handleClickNextPage}
+            onClick={this.handleClickNextPage}
             disabled={isLoading}
           >
-            {isLoading && <span>Loading..</span>}
-            {!isLoading && <span>Next page</span>}
+            <span>>></span>
           </button>
         </div>
         <div className="container stats-box" style={{ "min-width": "300px" }}>
           {matchesToShow
-            .filter(e => Object.getOwnPropertyNames(e).length !== 0) // skipping first empty object in the arr
-            .slice(0, 3)
+            .filter(e => Object.getOwnPropertyNames(e).length !== 0) // checking if there are matches
+            .slice(
+              this.state.matchesToShowIndexes[0],
+              this.state.matchesToShowIndexes[1]
+            )
             .map(e => (
               <div
                 className="row align-items-center marginMLRow"
@@ -49,6 +52,12 @@ class StatBoxs extends Component {
       </React.Fragment>
     );
   }
+
+  handleClickNextPage = () => {
+    this.setState({
+      matchesToShowIndexes: this.state.matchesToShowIndexes.map(e => e + 3)
+    });
+  };
 }
 
 export default StatBoxs;

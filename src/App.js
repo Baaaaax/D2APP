@@ -17,9 +17,7 @@ class App extends Component {
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
     selectedRadioBtn: "50",
-    noMatchFoundBool: false,
-    hasFoundResults: false,
-    isUpdating: false
+    noMatchFoundBool: false
   };
 
   render() {
@@ -52,8 +50,7 @@ class App extends Component {
                     />
                   )}
                   {this.state.matchesToShow.length <= 1 &&
-                    this.state.noMatchFoundBool &&
-                    !this.state.isUpdating && <h2>No matches found...</h2>}
+                    this.state.noMatchFoundBool && <h2>No matches found...</h2>}
                 </div>
               </div>
             </div>
@@ -174,7 +171,6 @@ class App extends Component {
               copyArr[copyArr.length - 1]
             ]
           }));
-          this.setState({ hasFoundResults: true });
         }
       }
     });
@@ -227,21 +223,21 @@ class App extends Component {
     this.getMembershipsId("bax#21629", "lightning#23190", settings); //"auriel#21174"
   };
 
-  handleClickNextPage = () => {
-    // var settings = {
-    //   method: "GET",
-    //   headers: {
-    //     "x-api-key": "cc8fc21c337a4399b94e9e11e7d908b8"
-    //   }
-    // };
-    // this.setState({ isLoading: true });
-    // this.setState({ noMatchFoundBool: false });
-    // this.setState({ isUpdating: true });
-    // this.setState({ matchesToShow: [{}] });
-    // this.setState({ matchEntryPGCR: [{}] });
-    // this.getActivityHistory(settings);
-    // this.setState({ currentPage: this.state.currentPage + 1 });
-  };
+  // handleClickNextPage = () => {
+  //   var settings = {
+  //     method: "GET",
+  //     headers: {
+  //       "x-api-key": "cc8fc21c337a4399b94e9e11e7d908b8"
+  //     }
+  //   };
+  //   this.setState({ isLoading: true });
+  //   this.setState({ noMatchFoundBool: false });
+  //   this.setState({ isUpdating: true });
+  //   this.setState({ matchesToShow: [{}] });
+  //   this.setState({ matchEntryPGCR: [{}] });
+  //   this.getActivityHistory(settings);
+  //   this.setState({ currentPage: this.state.currentPage + 1 });
+  //   };
 }
 
 export default App;

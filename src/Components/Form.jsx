@@ -7,7 +7,6 @@ const Form = props => {
     onSInputChange,
     secondInputValue,
     handleClickFetch,
-    handleClickNextPage,
     isLoading,
     selectedRadioBtn,
     onRadioBtnChange

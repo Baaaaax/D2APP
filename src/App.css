@@ -97,7 +97,7 @@ input[type="text"] {
   background-color: transparent;
   border: 0;
   border-bottom: solid 1px #f16051;
-  /* width: 30%; */
+  width: 100%;
   padding-bottom: 4px;
   color: #fff !important;
   font-weight: lighter;
@@ -117,6 +117,9 @@ input[type="text"] {
 .nxt-page-container {
   text-align: right;
 }
+.nextPageBtn {
+  width: 10%;
+}
 
 .stats-box {
   background-color: #282828;
@@ -127,8 +130,8 @@ input[type="text"] {
   border-top: 4px solid #666363e3;
   border-bottom: 4px solid #666363e3;
 
-  margin-top: 8px;
-  margin-right: 8px;
+  margin-top: 6px;
+  margin-left: -8px;
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
