@@ -28,6 +28,8 @@ body {
   height: 100vh;
   display: flex;
   justify-content: center;
+  min-width: 900px;
+  min-height: 720px;
 }
 
 .main {
@@ -37,6 +39,8 @@ body {
   width: 80%;
   margin: 0 auto;
   margin-top: 30px;
+  min-width: 760px;
+  min-height: 680px;
 }
 
 .title-container {
@@ -48,6 +52,7 @@ body {
   justify-content: center;
   text-align: center;
   color: #000;
+  min-height: 680px;
 }
 
 .title-container__title {
@@ -70,6 +75,7 @@ body {
   height: 90vh;
   padding-top: 50px;
   padding-left: 35px;
+  min-height: 680px;
 }
 
 .container-fluid {
@@ -133,6 +139,8 @@ input[type="text"] {
   margin-top: 6px;
   margin-left: -8px;
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  min-width: 364px;
 }
 
 .match-list {

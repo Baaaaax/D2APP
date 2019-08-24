@@ -14,7 +14,7 @@ class StatBoxs extends Component {
       secondMembershipId
     } = this.props;
     return (
-      <React.Fragment>
+      <div className="container main-statsbox">
         <div className="container">
           <div className="row">
             <div className="col-6">
@@ -69,7 +69,7 @@ class StatBoxs extends Component {
               </div>
             ))}
         </div>
-      </React.Fragment>
+      </div>
     );
   }
 

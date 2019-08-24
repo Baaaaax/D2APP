@@ -26,7 +26,7 @@ class App extends Component {
       <div>
         <div className="wrapper">
           <div className="main">
-            <div className="container">
+            <div className="container" style={{ maxWidth: 1700 }}>
               <div className="row">
                 <div className="col-5 title-container">
                   <Logo />
@@ -118,7 +118,7 @@ class App extends Component {
       this.state.characterIds[0] +
       "/Stats/Activities/?count=" +
       this.state.selectedRadioBtn +
-      "&mode=32&page=100";
+      "&mode=32&page=0";
 
     const response = await fetch(fetchUrl, settings);
     const data = await response.json();
