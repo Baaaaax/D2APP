@@ -16,9 +16,8 @@ class App extends Component {
     activitiesList: [{}],
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
-    selectedRadioBtn: "7",
+    selectedRadioBtn: "50",
     noMatchFoundBool: false,
-    currentPage: 0,
     hasFoundResults: false,
     isUpdating: false
   };
@@ -26,7 +25,7 @@ class App extends Component {
   render() {
     return (
       <div>
-        <div className="wrapper min-width-container">
+        <div className="wrapper">
           <div className="main">
             <div className="container">
               <div className="row">
@@ -38,7 +37,6 @@ class App extends Component {
                     onFInputChange={this.onFInputChange}
                     onSInputChange={this.onSInputChange}
                     handleClickFetch={this.handleClickFetch}
-                    handleClickNextPage={this.handleClickNextPage}
                     isLoading={this.state.isLoading}
                     hasFoundResults={this.state.hasFoundResults}
                     selectedRadioBtn={this.selectedRadioBtn}
@@ -50,6 +48,7 @@ class App extends Component {
                       matchesToShow={this.state.matchesToShow}
                       firstMembershipId={this.state.firstMembershipId}
                       secondMembershipId={this.state.secondMembershipId}
+                      handleClickNextPage={this.handleClickNextPage}
                     />
                   )}
                   {this.state.matchesToShow.length <= 1 &&
@@ -121,8 +120,7 @@ class App extends Component {
       this.state.characterIds[0] +
       "/Stats/Activities/?count=" +
       this.state.selectedRadioBtn +
-      "&mode=32&page=" +
-      this.state.currentPage;
+      "&mode=32&page=0";
 
     const response = await fetch(fetchUrl, settings);
     const data = await response.json();
@@ -230,19 +228,19 @@ class App extends Component {
   };
 
   handleClickNextPage = () => {
-    var settings = {
-      method: "GET",
-      headers: {
-        "x-api-key": "cc8fc21c337a4399b94e9e11e7d908b8"
-      }
-    };
-    this.setState({ isLoading: true });
-    this.setState({ noMatchFoundBool: false });
-    this.setState({ isUpdating: true });
-    this.setState({ matchesToShow: [{}] });
-    this.setState({ matchEntryPGCR: [{}] });
-    this.getActivityHistory(settings);
-    this.setState({ currentPage: this.state.currentPage + 1 });
+    // var settings = {
+    //   method: "GET",
+    //   headers: {
+    //     "x-api-key": "cc8fc21c337a4399b94e9e11e7d908b8"
+    //   }
+    // };
+    // this.setState({ isLoading: true });
+    // this.setState({ noMatchFoundBool: false });
+    // this.setState({ isUpdating: true });
+    // this.setState({ matchesToShow: [{}] });
+    // this.setState({ matchEntryPGCR: [{}] });
+    // this.getActivityHistory(settings);
+    // this.setState({ currentPage: this.state.currentPage + 1 });
   };
 }
 

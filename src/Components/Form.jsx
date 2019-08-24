@@ -8,7 +8,6 @@ const Form = props => {
     secondInputValue,
     handleClickFetch,
     handleClickNextPage,
-    hasFoundResults,
     isLoading,
     selectedRadioBtn,
     onRadioBtnChange
@@ -17,40 +16,39 @@ const Form = props => {
   return (
     <React.Fragment>
       <form>
-        <input
-          type="text"
-          placeholder="First Username.."
-          value={firstInputValue}
-          onChange={onFInputChange}
-        />
-        <input
-          type="text"
-          placeholder="Second Username.."
-          onChange={onSInputChange}
-          value={secondInputValue}
-        />
-
-        <button
-          type="button"
-          id="submitBtn"
-          className="btn btn-success btn-md"
-          onClick={handleClickFetch}
-          disabled={isLoading}
-        >
-          {isLoading && <span>Loading..</span>}
-          {!isLoading && <span>Go!</span>}
-        </button>
-        <button
-          type="button"
-          id="nextPageBtn"
-          className="btn btn-info btn-md"
-          onClick={handleClickNextPage}
-          disabled={!hasFoundResults}
-        >
-          {isLoading && <span>Loading..</span>}
-          {!isLoading && <span>Next page</span>}
-        </button>
-        <div className="inputContainer">
+        <div className="input-container container">
+          <div className="row">
+            <div className="col-6">
+              <input
+                type="text"
+                placeholder="First Username.."
+                value={firstInputValue}
+                onChange={onFInputChange}
+              />
+            </div>
+            <div className="col-6">
+              <input
+                type="text"
+                placeholder="Second Username.."
+                onChange={onSInputChange}
+                value={secondInputValue}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="btn-container container">
+          <button
+            type="button"
+            id="submitBtn"
+            className="btn btn-success btn-md"
+            onClick={handleClickFetch}
+            disabled={isLoading}
+          >
+            {isLoading && <span>Loading..</span>}
+            {!isLoading && <span>Go!</span>}
+          </button>
+        </div>
+        <div className="radio-btn-container container">
           <div className="custom-control custom-radio custom-control-inline">
             <input
               type="radio"

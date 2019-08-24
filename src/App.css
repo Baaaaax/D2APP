@@ -76,6 +76,20 @@ body {
   max-width: 75%;
 }
 
+.input-container {
+  text-align: center;
+}
+
+.btn-container {
+  width: 100%;
+  text-align: center;
+  margin-right: 20px;
+}
+
+#submitBtn {
+  width: 50%;
+  text-align: center;
+}
 input[type="text"] {
   outline: none;
 }
@@ -83,7 +97,7 @@ input[type="text"] {
   background-color: transparent;
   border: 0;
   border-bottom: solid 1px #f16051;
-  width: 30%;
+  /* width: 30%; */
   padding-bottom: 4px;
   color: #fff !important;
   font-weight: lighter;
@@ -99,6 +113,10 @@ input:focus {
 input[type="text"] {
   outline: none;
 }
+/* ///// */
+.nxt-page-container {
+  text-align: right;
+}
 
 .stats-box {
   background-color: #282828;
@@ -108,8 +126,9 @@ input[type="text"] {
   border-right: 4px solid #4caf50;
   border-top: 4px solid #666363e3;
   border-bottom: 4px solid #666363e3;
-  margin-top: 20px;
-  margin-left: -8px;
+
+  margin-top: 8px;
+  margin-right: 8px;
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
