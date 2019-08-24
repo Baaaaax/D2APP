@@ -18,7 +18,7 @@ class App extends Component {
     matchesToShow: [{}],
     selectedRadioBtn: "200",
     noMatchFoundBool: false,
-    currentPage: 100
+    currentPage: 0
   };
 
   render() {
@@ -118,21 +118,36 @@ class App extends Component {
       this.state.characterIds[0] +
       "/Stats/Activities/?count=" +
       this.state.selectedRadioBtn +
-      "&mode=32&page=0";
+      "&mode=5&page=" +
+      this.state.currentPage;
 
     const response = await fetch(fetchUrl, settings);
     const data = await response.json();
 
     console.log(data);
+    // if we find matches in the activtiy history , we call again this function with the next page
     if (Object.keys(data.Response).length >= 1) {
       console.log("finded");
-    }
-
-    this.setState({ activitiesList: data.Response.activities });
-    if (this.state.activitiesList) {
-      this.state.activitiesList.forEach(e => {
-        this.getPostGameCarnageReport(e.activityDetails.instanceId, settings);
-      });
+      this.setState({ currentPage: this.state.currentPage + 1 });
+      this.setState(prevState => ({
+        activitiesList: [...prevState.activitiesList, data.Response.activities]
+      }));
+      this.getActivityHistory(settings);
+    } else {
+      // else if there are no more matches we call the getpostgamecarnage
+      console.log("nothing found");
+      if (this.state.activitiesList) {
+        this.state.activitiesList
+          .slice(1, this.state.activitiesList.length)
+          .forEach(e => {
+            e.forEach(f => {
+              this.getPostGameCarnageReport(
+                f.activityDetails.instanceId,
+                settings
+              );
+            });
+          });
+      }
     }
   };
 
@@ -220,11 +235,10 @@ class App extends Component {
     };
 
     this.setState({ isLoading: true });
-    this.setState({ currentPage: 0 });
     this.setState({ matchesToShow: [{}] });
     this.setState({ matchEntryPGCR: [{}] });
 
-    this.getMembershipsId("bax#21629", "lightning#23190", settings); //"auriel#21174"
+    this.getMembershipsId("bax#21629", "tara#22686", settings); //"auriel#21174"
   };
 
   // handleClickNextPage = () => {

@@ -28,23 +28,23 @@ class MatchEntry extends Component {
             {this.decodeMap(matchMode)}
           </a>
         </div>
-        <div className="col">
+        <div className="col txt-center">
           <span>{this.formatDate(matchDate)}</span>
         </div>
         <div className="w-100 marginNameStatsRow" />
 
-        <div className="col">
+        <div className="col txt-center">
           <div className="row align-items-end">
-            <div className="col">
+            <div className="col txt-center">
               <span>KD</span>
             </div>
-            <div className="col">
+            <div className="col txt-center">
               <span>KDA</span>
             </div>
-            <div className="col">
+            <div className="col txt-center">
               <span>KILL</span>
             </div>
-            <div className="col">
+            <div className="col txt-center">
               <span>DEATH</span>
             </div>
           </div>
@@ -53,16 +53,16 @@ class MatchEntry extends Component {
 
         <div className="col">
           <div className="row align-items-end">
-            <div className="col">
+            <div className="col txt-center">
               <span>{this.getStats(matchPlayers, firstMembershipId, 0)}</span>
             </div>
-            <div className="col">
+            <div className="col txt-center">
               <span>{this.getStats(matchPlayers, firstMembershipId, 1)}</span>
             </div>
-            <div className="col">
+            <div className="col txt-center">
               <span>{this.getStats(matchPlayers, firstMembershipId, 2)}</span>
             </div>
-            <div className="col">
+            <div className="col txt-center">
               <span>{this.getStats(matchPlayers, firstMembershipId, 3)}</span>
             </div>
           </div>
