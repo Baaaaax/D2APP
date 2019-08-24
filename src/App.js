@@ -16,8 +16,9 @@ class App extends Component {
     activitiesList: [{}],
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
-    selectedRadioBtn: "50",
-    noMatchFoundBool: false
+    selectedRadioBtn: "200",
+    noMatchFoundBool: false,
+    currentPage: 100
   };
 
   render() {
@@ -117,15 +118,18 @@ class App extends Component {
       this.state.characterIds[0] +
       "/Stats/Activities/?count=" +
       this.state.selectedRadioBtn +
-      "&mode=32&page=0";
+      "&mode=32&page=100";
 
     const response = await fetch(fetchUrl, settings);
     const data = await response.json();
 
     console.log(data);
-    if (data) {
-      this.setState({ isUpdating: false });
-      this.setState({ activitiesList: data.Response.activities });
+    if (Object.keys(data.Response).length >= 1) {
+      console.log("finded");
+    }
+
+    this.setState({ activitiesList: data.Response.activities });
+    if (this.state.activitiesList) {
       this.state.activitiesList.forEach(e => {
         this.getPostGameCarnageReport(e.activityDetails.instanceId, settings);
       });

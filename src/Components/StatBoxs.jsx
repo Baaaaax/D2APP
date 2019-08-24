@@ -15,16 +15,36 @@ class StatBoxs extends Component {
     } = this.props;
     return (
       <React.Fragment>
-        <div className="nxt-page-container container">
-          <button
-            type="button"
-            id="nextPageBtn"
-            className="btn btn-info btn-md"
-            onClick={this.handleClickNextPage}
-            disabled={isLoading}
-          >
-            <span>>></span>
-          </button>
+        <div className="container">
+          <div className="row">
+            <div className="col-6">
+              <div className="prev-page-container">
+                <button
+                  type="button"
+                  id="prevPageBtn"
+                  className="btn btn-info btn-md"
+                  onClick={() => this.handleClickPage("prev")}
+                  disabled={isLoading}
+                >
+                  <span>Prev</span>
+                </button>
+              </div>
+            </div>
+            <div className="col-6">
+              {" "}
+              <div className="nxt-page-container">
+                <button
+                  type="button"
+                  id="nextPageBtn"
+                  className="btn btn-info btn-md"
+                  onClick={() => this.handleClickPage("next")}
+                  disabled={isLoading}
+                >
+                  <span>Next</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="container stats-box" style={{ "min-width": "300px" }}>
           {matchesToShow
@@ -53,10 +73,23 @@ class StatBoxs extends Component {
     );
   }
 
-  handleClickNextPage = () => {
-    this.setState({
-      matchesToShowIndexes: this.state.matchesToShowIndexes.map(e => e + 3)
-    });
+  handleClickPage = typeBtn => {
+    if (typeBtn === "prev") {
+      if (this.state.matchesToShowIndexes[0] > 0) {
+        this.setState({
+          matchesToShowIndexes: this.state.matchesToShowIndexes.map(e => e - 3)
+        });
+      }
+    } else {
+      if (
+        this.state.matchesToShowIndexes[1] <
+        this.props.matchesToShow.length - 1
+      ) {
+        this.setState({
+          matchesToShowIndexes: this.state.matchesToShowIndexes.map(e => e + 3)
+        });
+      }
+    }
   };
 }
 
