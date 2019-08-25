@@ -18,7 +18,8 @@ class App extends Component {
     matchesToShow: [{}],
     selectedRadioBtn: "200",
     noMatchFoundBool: false,
-    currentPage: 0
+    currentPage: 0,
+    promiseAllMatches: []
   };
 
   render() {
@@ -118,7 +119,7 @@ class App extends Component {
       this.state.characterIds[0] +
       "/Stats/Activities/?count=" +
       this.state.selectedRadioBtn +
-      "&mode=5&page=" +
+      "&mode=32&page=" +
       this.state.currentPage;
 
     const response = await fetch(fetchUrl, settings);
@@ -135,20 +136,42 @@ class App extends Component {
       this.getActivityHistory(settings);
     } else {
       // else if there are no more matches we call the getpostgamecarnage
-      console.log("nothing found");
+      console.log("got all matches");
       if (this.state.activitiesList) {
-        this.state.activitiesList
+        /*  this.state.activitiesList
           .slice(1, this.state.activitiesList.length)
-          .forEach(e => {
-            e.forEach(f => {
+          .map(e => {
+            //foreach to fix
+            e.map(f => {
               this.getPostGameCarnageReport(
                 f.activityDetails.instanceId,
                 settings
               );
             });
+          }); */
+
+        const t = this.state.activitiesList
+          .slice(1, this.state.activitiesList.length)
+          .map(e => {
+            e.map(f => {
+              return this.gTPGCR(f.activityDetails.istanceId, settings);
+            });
           });
+
+        console.log(t);
+
+        Promise.all();
       }
     }
+  };
+
+  gTPGCR = async (activityId, settings) => {
+    var fetchUrl =
+      "https://www.bungie.net/Platform/Destiny2/Stats/PostGameCarnageReport/" +
+      activityId +
+      "/";
+
+    return await fetch(fetchUrl, settings);
   };
 
   getPostGameCarnageReport = async (activityId, settings) => {
@@ -164,8 +187,7 @@ class App extends Component {
     this.setState(prevState => ({
       matchEntryPGCR: [...prevState.matchEntryPGCR, data.Response]
     }));
-
-    this.checkIfPlayed();
+    //this.checkIfPlayed();
   };
 
   checkIfPlayed = () => {
