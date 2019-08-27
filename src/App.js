@@ -3,6 +3,9 @@ import "./App.css";
 import Form from "./Components/Form";
 import Logo from "./Components/Logo";
 import StatBoxs from "./Components/StatBoxs";
+import { resolve } from "path";
+import { reject } from "q";
+const axios = require("axios");
 
 class App extends Component {
   state = {
@@ -13,13 +16,14 @@ class App extends Component {
     secondMembershipId: "",
     membershipType: 0,
     characterIds: [],
-    activitiesList: [{}],
+    activitiesList: [],
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
     selectedRadioBtn: "200",
     noMatchFoundBool: false,
     currentPage: 0,
-    promiseAllMatches: []
+    shouldGetMoreMatchBool: true,
+    shouldGetMorePGCRBool: true
   };
 
   render() {
@@ -62,6 +66,19 @@ class App extends Component {
     );
   }
 
+  FetchBehaviour = async (firstInputName, secondInputName, settings) => {
+    await this.getMembershipsId(firstInputName, secondInputName, settings);
+    await this.getProfile(settings);
+    while (this.state.shouldGetMoreMatchBool) {
+      await this.getActivityHistory(settings);
+      setInterval(2500);
+    }
+    setInterval(1000);
+    // while (this.state.shouldGetMorePGCRBool) {
+    //   await this.get200PostGameCarnageReport(settings);
+    //   setInterval(2500);
+    // }
+  };
   getMembershipsId = async (firstInputName, secondInputName, settings) => {
     const encodedName = encodeURIComponent(firstInputName);
     const encodedName2 = encodeURIComponent(secondInputName);
@@ -75,20 +92,13 @@ class App extends Component {
       encodedName2 +
       "/";
 
-    const response = await fetch(firstFetchUrl, settings);
-    const response2 = await fetch(secondFetchUrl, settings);
-    const data = await response.json();
-    const data2 = await response2.json();
+    const response = await axios.get(firstFetchUrl, settings);
+    const response2 = await axios.get(secondFetchUrl, settings);
 
     this.setState({
-      firstMembershipId: data.Response[0].membershipId
+      firstMembershipId: response.data.Response[0].membershipId,
+      secondMembershipId: response2.data.Response[0].membershipId
     });
-
-    this.setState({
-      secondMembershipId: data2.Response[0].membershipId
-    });
-
-    this.getProfile(settings);
   };
 
   getProfile = async settings => {
@@ -97,16 +107,13 @@ class App extends Component {
       this.state.firstMembershipId +
       "/?components=100";
 
-    const response = await fetch(fetchUrl, settings);
-    const data = await response.json();
+    const response = await axios.get(fetchUrl, settings);
 
-    console.log(data);
     this.setState({
-      characterIds: data.Response.profile.data.characterIds,
-      membershipType: data.Response.profile.data.userInfo.membershipType
+      characterIds: response.data.Response.profile.data.characterIds,
+      membershipType:
+        response.data.Response.profile.data.userInfo.membershipType
     });
-
-    this.getActivityHistory(settings);
   };
 
   getActivityHistory = async settings => {
@@ -119,75 +126,47 @@ class App extends Component {
       this.state.characterIds[0] +
       "/Stats/Activities/?count=" +
       this.state.selectedRadioBtn +
-      "&mode=32&page=" +
+      "&mode=5&page=" +
       this.state.currentPage;
 
-    const response = await fetch(fetchUrl, settings);
-    const data = await response.json();
+    const response = await axios.get(fetchUrl, settings);
 
-    console.log(data);
-    // if we find matches in the activtiy history , we call again this function with the next page
-    if (Object.keys(data.Response).length >= 1) {
+    if (Object.keys(response.data.Response).length >= 1) {
       console.log("finded");
       this.setState({ currentPage: this.state.currentPage + 1 });
       this.setState(prevState => ({
-        activitiesList: [...prevState.activitiesList, data.Response.activities]
+        activitiesList: [
+          ...prevState.activitiesList,
+          response.data.Response.activities
+        ]
       }));
-      this.getActivityHistory(settings);
     } else {
-      // else if there are no more matches we call the getpostgamecarnage
-      console.log("got all matches");
-      if (this.state.activitiesList) {
-        /*  this.state.activitiesList
-          .slice(1, this.state.activitiesList.length)
-          .map(e => {
-            //foreach to fix
-            e.map(f => {
-              this.getPostGameCarnageReport(
-                f.activityDetails.instanceId,
-                settings
-              );
-            });
-          }); */
-
-        const t = this.state.activitiesList
-          .slice(1, this.state.activitiesList.length)
-          .map(e => {
-            e.map(f => {
-              return this.gTPGCR(f.activityDetails.istanceId, settings);
-            });
-          });
-
-        console.log(t);
-
-        Promise.all();
-      }
+      var arr1d = [].concat(...this.state.activitiesList);
+      this.setState({ activitiesList: arr1d });
+      this.setState({ shouldGetMoreMatchBool: false });
+      console.log("no more matches");
     }
   };
 
-  gTPGCR = async (activityId, settings) => {
-    var fetchUrl =
-      "https://www.bungie.net/Platform/Destiny2/Stats/PostGameCarnageReport/" +
-      activityId +
-      "/";
-
-    return await fetch(fetchUrl, settings);
+  get200PostGameCarnageReport = async settings => {
+    // var activitiesList = [...this.state.activitiesList];
+    // var requests = activitiesList.map(e => {return await this.getPgcrPromise(e.activityDetails)})
+    // this.setState(prevState => ({
+    //   matchEntryPGCR: [...prevState.matchEntryPGCR, response.data.Response]
+    // }));
+    // setInterval(100);
   };
 
-  getPostGameCarnageReport = async (activityId, settings) => {
-    var fetchUrl =
+  getPgcrPromise = async (activityId, settings) => {
+    const fetchUrl =
       "https://www.bungie.net/Platform/Destiny2/Stats/PostGameCarnageReport/" +
       activityId +
       "/";
-
-    const response = await fetch(fetchUrl, settings);
-    const data = await response.json();
-
-    console.log(data);
-    this.setState(prevState => ({
-      matchEntryPGCR: [...prevState.matchEntryPGCR, data.Response]
-    }));
-    //this.checkIfPlayed();
+    var response = await axios.get(fetchUrl, settings);
+    setInterval(200);
+    return {
+      data: response.data.Response
+    };
   };
 
   checkIfPlayed = () => {
@@ -260,7 +239,7 @@ class App extends Component {
     this.setState({ matchesToShow: [{}] });
     this.setState({ matchEntryPGCR: [{}] });
 
-    this.getMembershipsId("bax#21629", "tara#22686", settings); //"auriel#21174"
+    this.FetchBehaviour("bax#21629", "tara#22686", settings); //"auriel#21174"
   };
 
   // handleClickNextPage = () => {
