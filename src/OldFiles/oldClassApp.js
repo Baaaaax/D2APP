@@ -1,11 +1,4 @@
-import React, { Component } from "react";
-import "./App.css";
-import Form from "./Components/Form";
-import Logo from "./Components/Logo";
-import StatBoxs from "./Components/StatBoxs";
-const axios = require("axios");
-
-class App extends Component {
+class a extends Component {
   state = {
     isLoading: false,
     firstInputValue: "",
@@ -23,39 +16,6 @@ class App extends Component {
     shouldGetMoreMatchBool: true,
     shouldGetMorePGCRBool: true
   };
-
-  shouldComponentUpdate(nextPros, nextState) {
-    if (!nextState.isLoading) {
-      console.log("shoulc False");
-      return false;
-    } else {
-      console.log("shoulc True");
-      return true;
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.isLoading !== prevState.isLoading) {
-      if (this.state.isLoading) {
-        console.log(
-          "we are in componentdidupdate and those are the prev a nd current stat e:" +
-            prevState.isLoading +
-            "," +
-            this.state.isLoading
-        );
-        var settings = {
-          method: "GET",
-          headers: {
-            "x-api-key": "cc8fc21c337a4399b94e9e11e7d908b8"
-          }
-        };
-
-        this.FetchBehaviour("bax#21629", "tara#22686", settings).then(r => {
-          this.setState({ isLoading: false });
-        }); //"auriel#21174"
-      }
-    }
-  }
 
   render() {
     return (
@@ -226,6 +186,7 @@ class App extends Component {
       }
     });
     this.timeOutNoMatchFoundBool();
+    this.setState({ isLoading: false });
   };
 
   onFInputChange = e => {
@@ -258,9 +219,18 @@ class App extends Component {
   };
 
   handleClickFetch = () => {
+    var settings = {
+      method: "GET",
+      headers: {
+        "x-api-key": "cc8fc21c337a4399b94e9e11e7d908b8"
+      }
+    };
+
     this.setState({ isLoading: true });
     this.setState({ matchesToShow: [{}] });
     this.setState({ matchEntryPGCR: [{}] });
+
+    this.FetchBehaviour("good#22799", "tara#22686", settings); //"auriel#21174"
   };
 
   // handleClickNextPage = () => {
@@ -278,6 +248,4 @@ class App extends Component {
   //   this.getActivityHistory(settings);
   //   this.setState({ currentPage: this.state.currentPage + 1 });
   //   };
-  //}
 }
-export default App;
