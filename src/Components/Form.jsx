@@ -8,8 +8,8 @@ const Form = props => {
     secondInputValue,
     handleClickFetch,
     isLoading,
-    selectedRadioBtn,
-    onRadioBtnChange
+    selectedCharacter,
+    onCharacterChange
   } = props;
 
   return (
@@ -47,58 +47,67 @@ const Form = props => {
             {!isLoading && <span>Go!</span>}
           </button>
         </div>
-        <div className="radio-btn-container container">
-          <div className="custom-control custom-radio custom-control-inline">
-            <input
-              type="radio"
-              id="customRadioInline1"
-              name="customRadioInline1"
-              className="custom-control-input"
-              value="50"
-              onChange={onRadioBtnChange}
-              checked={selectedRadioBtn === "50"}
-            />
-            <label
-              className="custom-control-label"
-              htmlFor="customRadioInline1"
-            >
-              50
-            </label>
-          </div>
-          <div className="custom-control custom-radio custom-control-inline">
-            <input
-              type="radio"
-              id="customRadioInline2"
-              name="customRadioInline1"
-              className="custom-control-input"
-              value="100"
-              onChange={onRadioBtnChange}
-              checked={selectedRadioBtn === "100"}
-            />
-            <label
-              className="custom-control-label"
-              htmlFor="customRadioInline2"
-            >
-              100
-            </label>
-          </div>
-          <div className="custom-control custom-radio custom-control-inline">
-            <input
-              type="radio"
-              id="customRadioInline3"
-              name="customRadioInline1"
-              className="custom-control-input"
-              value="200"
-              onChange={onRadioBtnChange}
-              checked={selectedRadioBtn === "200"}
-            />
-            <label
-              className="custom-control-label"
-              htmlFor="customRadioInline3"
-            >
-              200
-            </label>
-          </div>
+        <div className="container">
+          <ul className="character-container">
+            <li>
+              <div className="hunterCont">
+                <input
+                  type="radio"
+                  id="hunterBtn"
+                  name="hunterB"
+                  className=""
+                  value="0"
+                  onChange={onCharacterChange}
+                  checked={selectedCharacter === 0}
+                />
+                <label className="hunterB" htmlFor="hunterBtn">
+                  Hunter
+                </label>
+                <div class="check"></div>
+              </div>
+            </li>
+            <li>
+              <div className="warlockCont">
+                <input
+                  type="radio"
+                  id="warlockBtn"
+                  name="warlockB"
+                  className=""
+                  value="1"
+                  onChange={onCharacterChange}
+                  checked={selectedCharacter === 1}
+                />
+                <label className="warlockB" htmlFor="warlockBtn">
+                  Warlock
+                </label>
+                <div class="check">
+                  <div class="inside"></div>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div className="titanCont">
+                <input
+                  type="radio"
+                  id="titanBtn"
+                  name="titanB"
+                  className=""
+                  value="2"
+                  onChange={onCharacterChange}
+                  checked={selectedCharacter === 2}
+                />
+                <label className="titanB" htmlFor="titanBtn">
+                  Titan
+                </label>
+                <div class="check">
+                  <div class="inside"></div>
+                </div>
+              </div>
+            </li>
+          </ul>
+          <input type="radio" />
+          <input type="radio" />
+          <input type="radio" />
         </div>
       </form>
     </React.Fragment>

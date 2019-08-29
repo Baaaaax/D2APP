@@ -15,34 +15,18 @@ class App extends Component {
     membershipType: 0,
     characterIds: [],
     activitiesList: [],
+    activitiesListCount: 0,
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
-    selectedRadioBtn: "200",
-    noMatchFoundBool: false,
+    selectedCharacter: 0, //hunter 0 , warlock 1 , titan 2
     currentPage: 0,
     shouldGetMoreMatchBool: true,
     shouldGetMorePGCRBool: true
   };
 
-  shouldComponentUpdate(nextPros, nextState) {
-    if (!nextState.isLoading) {
-      console.log("shoulc False");
-      return false;
-    } else {
-      console.log("shoulc True");
-      return true;
-    }
-  }
-
   componentDidUpdate(prevProps, prevState) {
     if (this.state.isLoading !== prevState.isLoading) {
       if (this.state.isLoading) {
-        console.log(
-          "we are in componentdidupdate and those are the prev a nd current stat e:" +
-            prevState.isLoading +
-            "," +
-            this.state.isLoading
-        );
         var settings = {
           method: "GET",
           headers: {
@@ -50,9 +34,12 @@ class App extends Component {
           }
         };
 
-        this.FetchBehaviour("bax#21629", "tara#22686", settings).then(r => {
-          this.setState({ isLoading: false });
-        }); //"auriel#21174"
+        this.FetchBehaviour("bax#21629", "lightning#23190", settings).then(
+          r => {
+            document.querySelector(".loading-inner").style.opacity = 0;
+            this.setState({ isLoading: false });
+          }
+        ); //"auriel#21174" tara#22686
       }
     }
   }
@@ -67,15 +54,15 @@ class App extends Component {
                 <div className="col-5 title-container">
                   <Logo />
                 </div>
-                <div className="col-7 form-container">
+                <div className="col-7 form-container loading-outer">
                   <Form
                     onFInputChange={this.onFInputChange}
                     onSInputChange={this.onSInputChange}
                     handleClickFetch={this.handleClickFetch}
                     isLoading={this.state.isLoading}
                     hasFoundResults={this.state.hasFoundResults}
-                    selectedRadioBtn={this.selectedRadioBtn}
-                    onRadioBtnChange={this.onRadioBtnChange}
+                    selectedCharacter={this.selectedCharacter}
+                    onCharacterChange={this.onCharacterChange}
                   />
 
                   {this.state.matchesToShow.length > 1 && (
@@ -86,8 +73,8 @@ class App extends Component {
                       handleClickNextPage={this.handleClickNextPage}
                     />
                   )}
-                  {this.state.matchesToShow.length <= 1 &&
-                    this.state.noMatchFoundBool && <h2>No matches found...</h2>}
+
+                  <div className="container loading-inner">Loading...</div>
                 </div>
               </div>
             </div>
@@ -100,15 +87,10 @@ class App extends Component {
   FetchBehaviour = async (firstInputName, secondInputName, settings) => {
     await this.getMembershipsId(firstInputName, secondInputName, settings);
     await this.getProfile(settings);
-    while (this.state.shouldGetMoreMatchBool) {
-      await this.getActivityHistory(settings);
-      setInterval(2500);
-    }
-    setInterval(1000);
-    // while (this.state.shouldGetMorePGCRBool) {
-    //   await this.get200PostGameCarnageReport(settings);
-    //   setInterval(2500);
-    // }
+    await this.getHistoricalStats(settings);
+    await this.getActivityHistory(settings);
+    await this.getPostGameCarnageReport(settings);
+    await this.checkIfPlayed();
   };
   getMembershipsId = async (firstInputName, secondInputName, settings) => {
     const encodedName = encodeURIComponent(firstInputName);
@@ -147,7 +129,59 @@ class App extends Component {
     });
   };
 
+  getHistoricalStats = async settings => {
+    const fetchUrl =
+      "https://www.bungie.net/Platform//Destiny2/" +
+      this.state.membershipType +
+      "/Account/" +
+      this.state.firstMembershipId +
+      "/Character/" +
+      this.state.characterIds[0] +
+      "/Stats/";
+
+    const response = await axios.get(fetchUrl, settings);
+    this.setState({
+      activitiesListCount:
+        response.data.Response.allPvP.allTime.activitiesEntered.basic.value
+    });
+  };
+
   getActivityHistory = async settings => {
+    var arr = Array(this.state.activitiesListCount).fill(0);
+
+    if (arr.length <= 200) {
+      return this.activityFetch(settings, 0);
+    } else {
+      var requests = [...arr];
+
+      if (requests.length % 200 === 0) {
+        console.log("we are here");
+        requests = arr.slice(0, arr.length / 200);
+      } else {
+        requests = arr.slice(0, arr.length / 200 + 1);
+      }
+      var currPg = 0;
+      var req = requests.map(e => {
+        currPg++;
+        return this.activityFetch(settings, currPg - 1);
+      });
+
+      const response = await Promise.all(req);
+
+      response.forEach(e => {
+        this.setState(prevState => ({
+          activitiesList: [
+            ...prevState.activitiesList,
+            e.data.Response.activities
+          ]
+        }));
+      });
+      var arr1d = [].concat(...this.state.activitiesList);
+      this.setState({ activitiesList: arr1d });
+    }
+  };
+
+  activityFetch = async (settings, currentPage) => {
     const fetchUrl =
       "https://www.bungie.net/Platform/Destiny2/" +
       this.state.membershipType +
@@ -155,77 +189,90 @@ class App extends Component {
       this.state.firstMembershipId +
       "/Character/" +
       this.state.characterIds[0] +
-      "/Stats/Activities/?count=" +
-      this.state.selectedRadioBtn +
-      "&mode=5&page=" +
-      this.state.currentPage;
+      "/Stats/Activities/?count=200&mode=32&page=" +
+      currentPage;
+
+    console.log(fetchUrl);
 
     const response = await axios.get(fetchUrl, settings);
+    console.log("fething data...", response);
+    return {
+      data: response.data
+    };
+  };
 
-    if (Object.keys(response.data.Response).length >= 1) {
-      console.log("finded");
-      this.setState({ currentPage: this.state.currentPage + 1 });
+  getPostGameCarnageReport = async settings => {
+    var arr = this.state.activitiesList;
+
+    var preV = 0;
+    var curr = 200;
+    for (let i = 0; i < arr.length / 200; i++) {
+      var requests = [...arr];
+      requests = arr.slice(preV, curr).map(e => {
+        if (e) {
+          return this.pgcrFetch(e.activityDetails.instanceId, settings).then(
+            a => {
+              return a;
+            }
+          );
+        } else {
+          return "error";
+        }
+      });
+
+      const response = await Promise.all(requests);
+      console.log(response);
+
       this.setState(prevState => ({
-        activitiesList: [
-          ...prevState.activitiesList,
-          response.data.Response.activities
-        ]
+        matchEntryPGCR: [...prevState.matchEntryPGCR, response]
       }));
-    } else {
-      var arr1d = [].concat(...this.state.activitiesList);
-      this.setState({ activitiesList: arr1d });
-      this.setState({ shouldGetMoreMatchBool: false });
-      console.log("no more matches");
+      preV = preV + 200;
+      curr = curr + 200;
+      if (curr === 600) {
+        var arr1d = [].concat(...this.state.matchEntryPGCR).slice(1);
+        this.setState({ matchEntryPGCR: arr1d });
+        break;
+      }
     }
   };
 
-  get200PostGameCarnageReport = async settings => {
-    // var activitiesList = [...this.state.activitiesList];
-    // var requests = activitiesList.map(e => {return await this.getPgcrPromise(e.activityDetails)})
-    // this.setState(prevState => ({
-    //   matchEntryPGCR: [...prevState.matchEntryPGCR, response.data.Response]
-    // }));
-    // setInterval(100);
-  };
-
-  getPgcrPromise = async (activityId, settings) => {
+  pgcrFetch = async (activityId, settings) => {
     const fetchUrl =
       "https://www.bungie.net/Platform/Destiny2/Stats/PostGameCarnageReport/" +
       activityId +
       "/";
     var response = await axios.get(fetchUrl, settings);
-    setInterval(200);
     return {
       data: response.data.Response
     };
   };
 
-  checkIfPlayed = () => {
+  checkIfPlayed = async () => {
     var copyArr = [...this.state.matchEntryPGCR];
 
-    // Here we get the standing value (which team 0/1) of the first username
-    var standingValue = copyArr[copyArr.length - 1].entries.find(e => {
-      return (
-        e.player.destinyUserInfo.membershipId === this.state.firstMembershipId
-      );
-    });
-    // Here we check for every player with different standing value if they are the second username given
-    copyArr[copyArr.length - 1].entries.forEach(e => {
-      if (e.standing !== standingValue.standing) {
-        if (
-          e.player.destinyUserInfo.membershipId ===
-          this.state.secondMembershipId
-        ) {
-          this.setState(prevState => ({
-            matchesToShow: [
-              ...prevState.matchesToShow,
-              copyArr[copyArr.length - 1]
-            ]
-          }));
-        }
+    copyArr.forEach(e => {
+      if (e !== "error") {
+        var standingValue = e.data.entries.find(f => {
+          return (
+            f.player.destinyUserInfo.membershipId ===
+            this.state.firstMembershipId
+          );
+        });
+
+        e.data.entries.forEach(g => {
+          if (g.standing !== standingValue.standing) {
+            if (
+              g.player.destinyUserInfo.membershipId ===
+              this.state.secondMembershipId
+            ) {
+              this.setState(prevState => ({
+                matchesToShow: [...prevState.matchesToShow, e.data]
+              }));
+            }
+          }
+        });
       }
     });
-    this.timeOutNoMatchFoundBool();
   };
 
   onFInputChange = e => {
@@ -235,32 +282,18 @@ class App extends Component {
     this.setState({ secondInputValue: e.target.value });
   };
 
-  onRadioBtnChange = e => {
-    this.setState({ selectedRadioBtn: e.target.value });
-  };
-
-  timeOutNoMatchFoundBool = () => {
-    if (this.state.selectedRadioBtn === "50") {
-      setTimeout(() => {
-        this.setState({ noMatchFoundBool: true });
-      }, 3000);
-    }
-    if (this.state.selectedRadioBtn === "100") {
-      setTimeout(() => {
-        this.setState({ noMatchFoundBool: true });
-      }, 7000);
-    }
-    if (this.state.selectedRadioBtn === "200") {
-      setTimeout(() => {
-        this.setState({ noMatchFoundBool: true });
-      }, 8000);
-    }
+  onCharacterChange = e => {
+    this.setState({ selectedCharacter: e.target.value });
   };
 
   handleClickFetch = () => {
     this.setState({ isLoading: true });
     this.setState({ matchesToShow: [{}] });
     this.setState({ matchEntryPGCR: [{}] });
+    document.querySelector(".loading-inner").style.opacity = 1;
+  };
+  setDelay = i => {
+    setTimeout(i, 3000);
   };
 
   // handleClickNextPage = () => {

@@ -3,7 +3,7 @@ import MatchEntry from "./MatchEntry";
 
 class StatBoxs extends Component {
   state = {
-    matchesToShowIndexes: [0, 4]
+    matchesToShowIndexes: [1, 5]
   };
 
   render() {
@@ -48,7 +48,6 @@ class StatBoxs extends Component {
         </div>
         <div className="container stats-box" style={{ "min-width": "430px" }}>
           {matchesToShow
-            .filter(e => Object.getOwnPropertyNames(e).length !== 0) // checking if there are matches
             .slice(
               this.state.matchesToShowIndexes[0],
               this.state.matchesToShowIndexes[1]
@@ -75,7 +74,7 @@ class StatBoxs extends Component {
 
   handleClickPage = typeBtn => {
     if (typeBtn === "prev") {
-      if (this.state.matchesToShowIndexes[0] > 0) {
+      if (this.state.matchesToShowIndexes[0] > 1) {
         this.setState({
           matchesToShowIndexes: this.state.matchesToShowIndexes.map(e => e - 4)
         });
