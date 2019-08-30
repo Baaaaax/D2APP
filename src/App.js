@@ -18,12 +18,10 @@ class App extends Component {
     classHashes: [0, 0, 0],
     activitiesList: [],
     activitiesListCount: 0,
+    hasFoundMatches: false,
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
-    selectedCharacter: 0,
-    currentPage: 0,
-    shouldGetMoreMatchBool: true,
-    shouldGetMorePGCRBool: true
+    selectedCharacter: 0
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -75,7 +73,11 @@ class App extends Component {
                     />
                   )}
 
-                  <div className="container loading-inner">Loading...</div>
+                  <div className="container loading-inner">
+                    <div class="centered-spinner">
+                      <div class="cm-spinner"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -90,8 +92,10 @@ class App extends Component {
     await this.getProfile(settings);
     await this.getHistoricalStats(settings);
     await this.getActivityHistory(settings);
-    await this.getPostGameCarnageReport(settings);
-    await this.checkIfPlayed();
+    if (this.state.hasFoundMatches) {
+      await this.getPostGameCarnageReport(settings);
+      await this.checkIfPlayed();
+    }
   };
   getMembershipsId = async (firstInputName, secondInputName, settings) => {
     const encodedName = encodeURIComponent(firstInputName);
@@ -222,18 +226,27 @@ class App extends Component {
         }));
       });
       var arr1d = [].concat(...this.state.activitiesList);
-      this.setState({ activitiesList: arr1d });
+      if ((!arr1d[0], !arr1d[1], !arr1d[2])) {
+        // check if we finded matches
+        console.log("no matches found");
+        this.setState({ hasFoundMatches: false });
+      } else {
+        this.setState({ hasFoundMatches: true });
+        this.setState({ activitiesList: arr1d });
+      }
     }
   };
 
   activityFetch = async (settings, currentPage) => {
+    var index = this.state.selectedCharacter;
+    console.log(index);
     const fetchUrl =
       "https://www.bungie.net/Platform/Destiny2/" +
       this.state.membershipType +
       "/Account/" +
       this.state.firstMembershipId +
       "/Character/" +
-      this.state.characterIds[this.state.selectedCharacter] +
+      this.state.characterIds[index] +
       "/Stats/Activities/?count=200&mode=32&page=" +
       currentPage;
 
@@ -251,32 +264,49 @@ class App extends Component {
 
     var preV = 0;
     var curr = 200;
-    for (let i = 0; i < arr.length / 200; i++) {
-      var requests = [...arr];
-      requests = arr.slice(preV, curr).map(e => {
-        if (e) {
-          return this.pgcrFetch(e.activityDetails.instanceId, settings).then(
+    if (arr.length < 200) {
+      var requests = arr
+        .filter(e => {
+          return e !== "error";
+        })
+        .map(f => {
+          return this.pgcrFetch(f.activityDetails.instanceId, settings).then(
             a => {
               return a;
             }
           );
-        } else {
-          return "error";
-        }
-      });
+        });
 
-      const response = await Promise.all(requests);
+      var response = await Promise.all(requests);
       console.log(response);
+    } else {
+      for (let i = 0; i < arr.length / 200; i++) {
+        var requests = [...arr];
+        requests = arr.slice(preV, curr).map(e => {
+          if (e) {
+            return this.pgcrFetch(e.activityDetails.instanceId, settings).then(
+              a => {
+                return a;
+              }
+            );
+          } else {
+            return "error";
+          }
+        });
 
-      this.setState(prevState => ({
-        matchEntryPGCR: [...prevState.matchEntryPGCR, response]
-      }));
-      preV = preV + 200;
-      curr = curr + 200;
-      if (curr === 600) {
-        var arr1d = [].concat(...this.state.matchEntryPGCR).slice(1);
-        this.setState({ matchEntryPGCR: arr1d });
-        break;
+        const response = await Promise.all(requests);
+        console.log(response);
+
+        this.setState(prevState => ({
+          matchEntryPGCR: [...prevState.matchEntryPGCR, response]
+        }));
+        preV = preV + 200;
+        curr = curr + 200;
+        if (curr === 600) {
+          var arr1d = [].concat(...this.state.matchEntryPGCR).slice(1);
+          this.setState({ matchEntryPGCR: arr1d });
+          break;
+        }
       }
     }
   };
@@ -297,12 +327,14 @@ class App extends Component {
 
     copyArr.forEach(e => {
       if (e !== "error") {
-        var standingValue = e.data.entries.find(f => {
-          return (
-            f.player.destinyUserInfo.membershipId ===
-            this.state.firstMembershipId
-          );
-        });
+        if (e.data) {
+          var standingValue = e.data.entries.find(f => {
+            return (
+              f.player.destinyUserInfo.membershipId ===
+              this.state.firstMembershipId
+            );
+          });
+        }
 
         e.data.entries.forEach(g => {
           if (g.standing !== standingValue.standing) {
@@ -332,10 +364,24 @@ class App extends Component {
   };
 
   handleClickFetch = () => {
+    this.handleResetState();
     this.setState({ isLoading: true });
-    this.setState({ matchesToShow: [{}] });
-    this.setState({ matchEntryPGCR: [{}] });
     document.querySelector(".loading-inner").style.opacity = 1;
+  };
+
+  handleResetState = () => {
+    this.setState({
+      firstMembershipId: "",
+      secondMembershipId: "",
+      membershipType: 0,
+      characterIds: [], //titan 0,hunter 1 , warlock 2 ,
+      classHashes: [0, 0, 0],
+      activitiesList: [],
+      activitiesListCount: 0,
+      hasFoundMatches: false,
+      matchEntryPGCR: [{}],
+      matchesToShow: [{}]
+    });
   };
   setDelay = i => {
     setTimeout(i, 3000);

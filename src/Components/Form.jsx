@@ -1,6 +1,6 @@
 import React, { Component, useState } from "react";
 import HunterLogo from "../img/pngkey.com-destiny-hunter-png-443266.png";
-import TitanLogo from "../img/trzcacak.rs-destiny-titan-logo-png-2315431.png";
+import TitanLogo from "../img/kisspng-destiny-2-destiny-rise-of-iron-symbol-battlefield-destiny-5ad1f4e20d9978.4587373015237091540557.png";
 import WarlockLogo from "../img/ttbKXabjPKbLv2bW98v6U6VC5.png";
 
 const Form = props => {
