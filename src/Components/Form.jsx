@@ -47,69 +47,22 @@ const Form = props => {
             {!isLoading && <span>Go!</span>}
           </button>
         </div>
-        <div className="container">
-          <ul className="character-container">
-            <li>
-              <div className="hunterCont">
-                <input
-                  type="radio"
-                  id="hunterBtn"
-                  name="hunterB"
-                  className=""
-                  value="0"
-                  onChange={onCharacterChange}
-                  checked={selectedCharacter === 0}
-                />
-                <label className="hunterB" htmlFor="hunterBtn">
-                  Hunter
-                </label>
-                <div class="check"></div>
-              </div>
-            </li>
-            <li>
-              <div className="warlockCont">
-                <input
-                  type="radio"
-                  id="warlockBtn"
-                  name="warlockB"
-                  className=""
-                  value="1"
-                  onChange={onCharacterChange}
-                  checked={selectedCharacter === 1}
-                />
-                <label className="warlockB" htmlFor="warlockBtn">
-                  Warlock
-                </label>
-                <div class="check">
-                  <div class="inside"></div>
-                </div>
-              </div>
-            </li>
-            <li>
-              <div className="titanCont">
-                <input
-                  type="radio"
-                  id="titanBtn"
-                  name="titanB"
-                  className=""
-                  value="2"
-                  onChange={onCharacterChange}
-                  checked={selectedCharacter === 2}
-                />
-                <label className="titanB" htmlFor="titanBtn">
-                  Titan
-                </label>
-                <div class="check">
-                  <div class="inside"></div>
-                </div>
-              </div>
-            </li>
-          </ul>
-          <input type="radio" />
-          <input type="radio" />
-          <input type="radio" />
-        </div>
       </form>
+      <div class="switch">
+        <input name="switch" id="one" type="radio" checked />
+        <label for="one" class="switch__label">
+          One
+        </label>
+        <input name="switch" id="two" type="radio" />
+        <label for="two" class="switch__label">
+          Two
+        </label>
+        <input name="switch" id="three" type="radio" />
+        <label for="three" class="switch__label">
+          Three
+        </label>
+        <div class="switch__indicator" />
+      </div>
     </React.Fragment>
   );
 };

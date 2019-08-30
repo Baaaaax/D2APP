@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import "./App.css";
+import "./App.scss";
 import Form from "./Components/Form";
 import Logo from "./Components/Logo";
 import StatBoxs from "./Components/StatBoxs";
