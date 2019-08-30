@@ -48,7 +48,7 @@ const Form = props => {
           </button>
         </div>
       </form>
-      <div class="switch">
+      <div class="radioBtn-cont">
         <input name="switch" id="one" type="radio" checked />
         <label for="one" class="switch__label">
           One
