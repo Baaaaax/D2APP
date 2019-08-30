@@ -1,4 +1,7 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
+import HunterLogo from "../img/pngkey.com-destiny-hunter-png-443266.png";
+import TitanLogo from "../img/trzcacak.rs-destiny-titan-logo-png-2315431.png";
+import WarlockLogo from "../img/ttbKXabjPKbLv2bW98v6U6VC5.png";
 
 const Form = props => {
   const {
@@ -11,6 +14,13 @@ const Form = props => {
     selectedCharacter,
     onCharacterChange
   } = props;
+
+  const [charSelected, setCharSelected] = useState(0);
+
+  const onRadioBtnChange = e => {
+    setCharSelected(e.target.value);
+    onCharacterChange(e);
+  };
 
   return (
     <React.Fragment>
@@ -48,20 +58,51 @@ const Form = props => {
           </button>
         </div>
       </form>
-      <div class="radioBtn-cont">
-        <input name="switch" id="one" type="radio" checked />
-        <label for="one" class="switch__label">
-          One
-        </label>
-        <input name="switch" id="two" type="radio" />
-        <label for="two" class="switch__label">
-          Two
-        </label>
-        <input name="switch" id="three" type="radio" />
-        <label for="three" class="switch__label">
-          Three
-        </label>
-        <div class="switch__indicator" />
+      <div className="container char-cont">
+        <div className="row">
+          <div className="col-4">
+            <label className="logo-label">
+              <input
+                className="inputRadio"
+                name="switch"
+                id="three"
+                type="radio"
+                value="0"
+                onChange={onRadioBtnChange}
+                checked={charSelected === "0"}
+              />
+              <img src={TitanLogo} id="titanImg" className="logo-image" />
+            </label>
+          </div>
+          <div className="col-4">
+            <label className="logo-label">
+              <input
+                name="switch"
+                className="inputRadio"
+                id="one"
+                type="radio"
+                value="1"
+                onChange={onRadioBtnChange}
+                checked={charSelected === "1"}
+              />
+              <img src={HunterLogo} className="logo-image" />
+            </label>
+          </div>
+          <div className="col-4">
+            <label className="logo-label">
+              <input
+                name="switch"
+                id="two"
+                type="radio"
+                className="inputRadio"
+                value="2"
+                onChange={onRadioBtnChange}
+                checked={charSelected === "2"}
+              />
+              <img src={WarlockLogo} className="logo-image" />
+            </label>
+          </div>
+        </div>
       </div>
     </React.Fragment>
   );

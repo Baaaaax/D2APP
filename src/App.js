@@ -3,6 +3,7 @@ import "./App.scss";
 import Form from "./Components/Form";
 import Logo from "./Components/Logo";
 import StatBoxs from "./Components/StatBoxs";
+
 const axios = require("axios");
 
 class App extends Component {
@@ -13,12 +14,13 @@ class App extends Component {
     firstMembershipId: "",
     secondMembershipId: "",
     membershipType: 0,
-    characterIds: [],
+    characterIds: [], //titan 0,hunter 1 , warlock 2 ,
+    classHashes: [0, 0, 0],
     activitiesList: [],
     activitiesListCount: 0,
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
-    selectedCharacter: 0, //hunter 0 , warlock 1 , titan 2
+    selectedCharacter: 0,
     currentPage: 0,
     shouldGetMoreMatchBool: true,
     shouldGetMorePGCRBool: true
@@ -61,7 +63,6 @@ class App extends Component {
                     handleClickFetch={this.handleClickFetch}
                     isLoading={this.state.isLoading}
                     hasFoundResults={this.state.hasFoundResults}
-                    selectedCharacter={this.selectedCharacter}
                     onCharacterChange={this.onCharacterChange}
                   />
 
@@ -118,15 +119,59 @@ class App extends Component {
     const fetchUrl =
       "https://www.bungie.net/Platform/Destiny2/4/Profile/" +
       this.state.firstMembershipId +
-      "/?components=100";
+      "/?components=100,200";
 
     const response = await axios.get(fetchUrl, settings);
+    console.log(response);
 
     this.setState({
       characterIds: response.data.Response.profile.data.characterIds,
       membershipType:
-        response.data.Response.profile.data.userInfo.membershipType
+        response.data.Response.profile.data.userInfo.membershipType,
+      classHashes: Object.keys(response.data.Response.characters.data).map(
+        e => {
+          return response.data.Response.characters.data[e].classHash;
+        }
+      )
     });
+
+    await this.setCharacterOrder(response.data.Response.characters.data);
+  };
+
+  setCharacterOrder = async characterObj => {
+    console.log(characterObj);
+    var copyArr = [...this.state.characterIds];
+    Object.keys(characterObj).forEach(e => {
+      switch (characterObj[e].classType) {
+        case 0:
+          if (e !== copyArr[0]) {
+            console.log("old copy arr ", copyArr);
+            this.insertAndShift(copyArr, copyArr.indexOf(e), 0);
+            console.log("new copy arr ", copyArr);
+          }
+          break;
+        case 1:
+          if (e !== copyArr[1]) {
+            console.log("old copy arr ", copyArr);
+            this.insertAndShift(copyArr, copyArr.indexOf(e), 1);
+            console.log("new copy arr ", copyArr);
+          }
+          break;
+        case 3:
+          if (e !== copyArr[2]) {
+            console.log("old copy arr ", copyArr);
+            this.insertAndShift(copyArr, copyArr.indexOf(e), 2);
+            console.log("new copy arr ", copyArr);
+          }
+          break;
+      }
+    });
+    this.setState({ characterIds: copyArr });
+  };
+
+  insertAndShift = (arr, from, to) => {
+    let cutOut = arr.splice(from, 1)[0]; // cut the element at index 'from'
+    return arr.splice(to, 0, cutOut); // insert it at index 'to'
   };
 
   getHistoricalStats = async settings => {
@@ -136,7 +181,7 @@ class App extends Component {
       "/Account/" +
       this.state.firstMembershipId +
       "/Character/" +
-      this.state.characterIds[0] +
+      this.state.characterIds[this.state.selectedCharacter] +
       "/Stats/";
 
     const response = await axios.get(fetchUrl, settings);
@@ -188,7 +233,7 @@ class App extends Component {
       "/Account/" +
       this.state.firstMembershipId +
       "/Character/" +
-      this.state.characterIds[0] +
+      this.state.characterIds[this.state.selectedCharacter] +
       "/Stats/Activities/?count=200&mode=32&page=" +
       currentPage;
 

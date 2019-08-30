@@ -139,6 +139,34 @@ input[placeholder] {
 
 /* ///////////////////*/
 
+.char-cont {
+  max-width: 50%;
+}
+.inputRadio {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+.logo-image {
+  max-width: 100%;
+  max-height: 100%;
+}
+.logo-image:hover {
+  opacity: 0.4;
+  cursor: pointer;
+}
+
+.logo-image:active {
+  opacity: 0.4;
+  cursor: pointer;
+}
+
+input[type="radio"]:checked + .logo-image {
+  border-bottom: 2px solid rgb(64, 233, 21);
+}
+
+#titanImg {
+}
 /* ///// */
 
 .main-statsbox {
