@@ -3,18 +3,9 @@ body {
 }
 
 .App-logo {
-  animation: App-logo-spin infinite 20s linear;
   pointer-events: none;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
 .wrapper {
   background-color: #bad375;
   height: 100vh;
