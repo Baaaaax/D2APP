@@ -21,7 +21,8 @@ class App extends Component {
     hasFoundMatches: false,
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
-    selectedCharacter: 0
+    selectedCharacter: 0,
+    moreMatchesToShow: false
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -34,12 +35,10 @@ class App extends Component {
           }
         };
 
-        this.FetchBehaviour("bax#21629", "lightning#23190", settings).then(
-          r => {
-            document.querySelector(".loading-inner").style.opacity = 0;
-            this.setState({ isLoading: false });
-          }
-        ); //"auriel#21174" tara#22686
+        this.FetchBehaviour("bax#21629", "tara#22686", settings).then(r => {
+          document.querySelector(".loading-inner").style.opacity = 0;
+          this.setState({ isLoading: false });
+        }); //"auriel#21174" tara#22686
       }
     }
   }
@@ -94,6 +93,9 @@ class App extends Component {
     await this.getActivityHistory(settings);
     if (this.state.hasFoundMatches) {
       await this.getPostGameCarnageReport(settings);
+      if (this.state.moreMatchesToShow) {
+        await this.getPostGameCarnageReport(settings);
+      }
       await this.checkIfPlayed();
     }
   };
@@ -247,7 +249,7 @@ class App extends Component {
       this.state.firstMembershipId +
       "/Character/" +
       this.state.characterIds[index] +
-      "/Stats/Activities/?count=200&mode=32&page=" +
+      "/Stats/Activities/?count=200&mode=5&page=" +
       currentPage;
 
     console.log(fetchUrl);
@@ -262,8 +264,6 @@ class App extends Component {
   getPostGameCarnageReport = async settings => {
     var arr = this.state.activitiesList;
 
-    var preV = 0;
-    var curr = 200;
     if (arr.length < 200) {
       var requests = arr
         .filter(e => {
@@ -279,7 +279,16 @@ class App extends Component {
 
       var response = await Promise.all(requests);
       console.log(response);
+      this.setState({
+        matchEntryPGCR: response
+      });
     } else {
+      var preV = 0;
+      var curr = 200;
+      if (this.state.moreMatchesToShow) {
+        preV += 1000;
+        curr += 1000;
+      }
       for (let i = 0; i < arr.length / 200; i++) {
         var requests = [...arr];
         requests = arr.slice(preV, curr).map(e => {
@@ -302,10 +311,17 @@ class App extends Component {
         }));
         preV = preV + 200;
         curr = curr + 200;
-        if (curr === 600) {
-          var arr1d = [].concat(...this.state.matchEntryPGCR).slice(1);
-          this.setState({ matchEntryPGCR: arr1d });
-          break;
+        console.log(curr);
+        if (curr % 1200 === 0) {
+          if (curr < this.state.activitiesListCount) {
+            this.setState({ moreMatchesToShow: true });
+            break;
+          } else {
+            var arr1d = [].concat(...this.state.matchEntryPGCR).slice(1);
+            this.setState({ matchEntryPGCR: arr1d });
+            this.setState({ moreMatchesToShow: false });
+            break;
+          }
         }
       }
     }
@@ -326,15 +342,13 @@ class App extends Component {
     var copyArr = [...this.state.matchEntryPGCR];
 
     copyArr.forEach(e => {
-      if (e !== "error") {
-        if (e.data) {
-          var standingValue = e.data.entries.find(f => {
-            return (
-              f.player.destinyUserInfo.membershipId ===
-              this.state.firstMembershipId
-            );
-          });
-        }
+      if (e !== "error" && e.data) {
+        var standingValue = e.data.entries.find(f => {
+          return (
+            f.player.destinyUserInfo.membershipId ===
+            this.state.firstMembershipId
+          );
+        });
 
         e.data.entries.forEach(g => {
           if (g.standing !== standingValue.standing) {
