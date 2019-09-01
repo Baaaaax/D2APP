@@ -8,9 +8,14 @@ const axios = require("axios");
 
 class App extends Component {
   state = {
+    fullFetch: true,
+    btnFetchCount: 0,
+    fetchStartEnd: [0, 500],
     isLoading: false,
     firstInputValue: "",
     secondInputValue: "",
+    fName: "",
+    sName: "",
     firstMembershipId: "",
     secondMembershipId: "",
     membershipType: 0,
@@ -36,7 +41,10 @@ class App extends Component {
         };
 
         this.FetchBehaviour("bax#21629", "tara#22686", settings).then(r => {
-          document.querySelector(".loading-inner").style.opacity = 0;
+          if (this.state.matchesToShow.length > 1) {
+            document.querySelector(".loading-inner").style.opacity = 0;
+          } else {
+          }
           this.setState({ isLoading: false });
         }); //"auriel#21174" tara#22686
       }
@@ -73,9 +81,11 @@ class App extends Component {
                   )}
 
                   <div className="container loading-inner">
-                    <div class="centered-spinner">
-                      <div class="cm-spinner"></div>
-                    </div>
+                    {this.state.isLoading && (
+                      <div class="centered-spinner">
+                        <div class="cm-spinner"></div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -87,19 +97,30 @@ class App extends Component {
   }
 
   FetchBehaviour = async (firstInputName, secondInputName, settings) => {
-    await this.getMembershipsId(firstInputName, secondInputName, settings);
-    await this.getProfile(settings);
-    await this.getHistoricalStats(settings);
-    await this.getActivityHistory(settings);
-    if (this.state.hasFoundMatches) {
-      await this.getPostGameCarnageReport(settings);
-      if (this.state.moreMatchesToShow) {
-        await this.getPostGameCarnageReport(settings);
+    if (this.state.fullFetch) {
+      await this.getMembershipsId(firstInputName, secondInputName, settings);
+      await this.getProfile(settings);
+      await this.getHistoricalStats(settings);
+      await this.getActivityHistory(settings);
+      if (this.state.hasFoundMatches) {
+        await this.getPostGameCarnageReport(
+          this.state.fetchStartEnd[0],
+          this.state.fetchStartEnd[1],
+          settings
+        );
+        await this.checkIfPlayed();
       }
+    } else {
+      await this.getPostGameCarnageReport(
+        this.state.fetchStartEnd[0],
+        this.state.fetchStartEnd[1],
+        settings
+      );
       await this.checkIfPlayed();
     }
   };
   getMembershipsId = async (firstInputName, secondInputName, settings) => {
+    this.setState({ fName: firstInputName, sName: secondInputName });
     const encodedName = encodeURIComponent(firstInputName);
     const encodedName2 = encodeURIComponent(secondInputName);
 
@@ -261,10 +282,10 @@ class App extends Component {
     };
   };
 
-  getPostGameCarnageReport = async settings => {
+  getPostGameCarnageReport = async (start, end, settings) => {
     var arr = this.state.activitiesList;
 
-    if (arr.length < 200) {
+    if (arr.length < 250) {
       var requests = arr
         .filter(e => {
           return e !== "error";
@@ -283,13 +304,10 @@ class App extends Component {
         matchEntryPGCR: response
       });
     } else {
-      var preV = 0;
-      var curr = 200;
-      if (this.state.moreMatchesToShow) {
-        preV += 1000;
-        curr += 1000;
-      }
-      for (let i = 0; i < arr.length / 200; i++) {
+      var preV = start;
+      var curr = end / 2;
+
+      for (let i = 0; i < 3; i++) {
         var requests = [...arr];
         requests = arr.slice(preV, curr).map(e => {
           if (e) {
@@ -309,19 +327,13 @@ class App extends Component {
         this.setState(prevState => ({
           matchEntryPGCR: [...prevState.matchEntryPGCR, response]
         }));
-        preV = preV + 200;
-        curr = curr + 200;
-        console.log(curr);
-        if (curr % 1200 === 0) {
-          if (curr < this.state.activitiesListCount) {
-            this.setState({ moreMatchesToShow: true });
-            break;
-          } else {
-            var arr1d = [].concat(...this.state.matchEntryPGCR).slice(1);
-            this.setState({ matchEntryPGCR: arr1d });
-            this.setState({ moreMatchesToShow: false });
-            break;
-          }
+        preV = preV + 250;
+        curr = curr + 250;
+
+        if (curr === 750) {
+          var arr1d = [].concat(...this.state.matchEntryPGCR).slice(1);
+          this.setState({ matchEntryPGCR: arr1d });
+          break;
         }
       }
     }
@@ -378,13 +390,41 @@ class App extends Component {
   };
 
   handleClickFetch = () => {
-    this.handleResetState();
-    this.setState({ isLoading: true });
-    document.querySelector(".loading-inner").style.opacity = 1;
+    if (this.state.btnFetchCount === 0) {
+      // If is the first time we click
+      this.setState({
+        isLoading: true,
+        btnFetchCount: this.state.btnFetchCount + 1
+      });
+      document.querySelector(".loading-inner").style.opacity = 1;
+    } else {
+      if (
+        // if the input changes we will reset and refetch
+        this.state.firstInputValue !== this.state.fName ||
+        this.state.secondInputValue !== this.state.sName
+      ) {
+        this.handleResetState();
+        this.setState({
+          isLoading: true,
+          btnFetchCount: this.state.btnFetchCount + 1
+        });
+        document.querySelector(".loading-inner").style.opacity = 1;
+      } else {
+        // else we don't do a full fetch
+        console.log("same name");
+        this.setState({
+          isLoading: true,
+          btnFetchCount: this.state.btnFetchCount + 1,
+          fullFetch: false
+        });
+        document.querySelector(".loading-inner").style.opacity = 1;
+      }
+    }
   };
 
   handleResetState = () => {
     this.setState({
+      fullFetch: true,
       firstMembershipId: "",
       secondMembershipId: "",
       membershipType: 0,
@@ -394,7 +434,9 @@ class App extends Component {
       activitiesListCount: 0,
       hasFoundMatches: false,
       matchEntryPGCR: [{}],
-      matchesToShow: [{}]
+      matchesToShow: [{}],
+      fName: "",
+      sName: ""
     });
   };
   setDelay = i => {
