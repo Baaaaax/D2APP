@@ -11,13 +11,16 @@ class StatBoxs extends Component {
       isLoading,
       matchesToShow,
       firstMembershipId,
-      secondMembershipId
+      secondMembershipId,
+      handleNext500Fetch,
+      activitiesListCount,
+      canFetchAgain
     } = this.props;
     return (
       <div className="container main-statsbox">
         <div className="container">
           <div className="row">
-            <div className="col-6">
+            <div className="col-4">
               <div className="prev-page-container">
                 <button
                   type="button"
@@ -30,8 +33,17 @@ class StatBoxs extends Component {
                 </button>
               </div>
             </div>
-            <div className="col-6">
-              {" "}
+            <div className="col-4">
+              <button
+                type="button"
+                className="btn btn-info btn-md"
+                onClick={handleNext500Fetch}
+                disabled={!canFetchAgain && isLoading}
+              >
+                Next 500 matches
+              </button>
+            </div>
+            <div className="col-4">
               <div className="nxt-page-container">
                 <button
                   type="button"

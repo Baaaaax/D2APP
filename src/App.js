@@ -27,7 +27,8 @@ class App extends Component {
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
     selectedCharacter: 0,
-    moreMatchesToShow: false
+    moreMatchesToShow: false,
+    canFetchAgain: true
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -41,9 +42,11 @@ class App extends Component {
         };
 
         this.FetchBehaviour("bax#21629", "tara#22686", settings).then(r => {
-          if (this.state.matchesToShow.length > 1) {
+          if (
+            this.state.matchesToShow.length > 1 ||
+            !this.state.canFetchAgain
+          ) {
             document.querySelector(".loading-inner").style.opacity = 0;
-          } else {
           }
           this.setState({ isLoading: false });
         }); //"auriel#21174" tara#22686
@@ -76,16 +79,32 @@ class App extends Component {
                       matchesToShow={this.state.matchesToShow}
                       firstMembershipId={this.state.firstMembershipId}
                       secondMembershipId={this.state.secondMembershipId}
-                      handleClickNextPage={this.handleClickNextPage}
+                      handleNext500Fetch={this.handleNext500Fetch}
+                      activitiesListCount={this.state.activitiesListCount}
+                      canFetchAgain={this.state.canFetchAgain}
                     />
                   )}
 
                   <div className="container loading-inner">
                     {this.state.isLoading && (
-                      <div class="centered-spinner">
-                        <div class="cm-spinner"></div>
+                      <div className="centered-spinner">
+                        <div className="cm-spinner"></div>
                       </div>
                     )}
+                    {!this.state.isLoading &&
+                      this.state.matchesToShow.length <= 1 && (
+                        <div className="centered-spinner">
+                          <p>No matches found...</p>
+                          <button
+                            type="button"
+                            className="nxt-mtc-btn"
+                            onClick={this.handleNext500Fetch}
+                            disabled={!this.state.canFetchAgain}
+                          >
+                            Search next 500..
+                          </button>
+                        </div>
+                      )}
                   </div>
                 </div>
               </div>
@@ -305,7 +324,8 @@ class App extends Component {
       });
     } else {
       var preV = start;
-      var curr = end / 2;
+      var curr = preV + 250;
+      console.log(preV, curr);
 
       for (let i = 0; i < 3; i++) {
         var requests = [...arr];
@@ -327,13 +347,20 @@ class App extends Component {
         this.setState(prevState => ({
           matchEntryPGCR: [...prevState.matchEntryPGCR, response]
         }));
-        preV = preV + 250;
-        curr = curr + 250;
-
-        if (curr === 750) {
+        if (response.length < 250) {
+          console.log("less than 200 find");
           var arr1d = [].concat(...this.state.matchEntryPGCR).slice(1);
-          this.setState({ matchEntryPGCR: arr1d });
+          this.setState({ canFetchAgain: false, matchEntryPGCR: arr1d });
           break;
+        } else {
+          preV = preV + 250;
+          curr = curr + 250;
+
+          if (curr === this.state.fetchStartEnd[1] + 250) {
+            var arr1d = [].concat(...this.state.matchEntryPGCR).slice(1);
+            this.setState({ matchEntryPGCR: arr1d });
+            break;
+          }
         }
       }
     }
@@ -422,6 +449,19 @@ class App extends Component {
     }
   };
 
+  handleNext500Fetch = () => {
+    this.setState({
+      fullFetch: false,
+      fetchStartEnd: [
+        this.state.fetchStartEnd[0] + 500,
+        this.state.fetchStartEnd[1] + 500
+      ],
+
+      matchEntryPGCR: [{}],
+      isLoading: true
+    });
+  };
+
   handleResetState = () => {
     this.setState({
       fullFetch: true,
@@ -436,7 +476,9 @@ class App extends Component {
       matchEntryPGCR: [{}],
       matchesToShow: [{}],
       fName: "",
-      sName: ""
+      sName: "",
+      fetchStartEnd: [0, 500],
+      canFetchAgain: true
     });
   };
   setDelay = i => {
