@@ -62,15 +62,6 @@ const Form = props => {
         <div className="row">
           <div className="col-4">
             <label className="logo-label">
-              <input
-                className="inputRadio"
-                name="switch"
-                id="three"
-                type="radio"
-                value="0"
-                onChange={onRadioBtnChange}
-                checked={charSelected === "0"}
-              />
               <img src={TitanLogo} id="titanImg" className="logo-image" />
             </label>
           </div>
@@ -102,6 +93,14 @@ const Form = props => {
               <img src={WarlockLogo} className="logo-image" />
             </label>
           </div>
+          <input
+            type="range"
+            min="1"
+            max="1"
+            value="50"
+            class="slider"
+            id="myRange"
+          />
         </div>
       </div>
     </React.Fragment>

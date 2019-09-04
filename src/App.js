@@ -41,15 +41,17 @@ class App extends Component {
           }
         };
 
-        this.FetchBehaviour("bax#21629", "tara#22686", settings).then(r => {
-          if (
-            this.state.matchesToShow.length > 1 ||
-            !this.state.canFetchAgain
-          ) {
-            document.querySelector(".loading-inner").style.opacity = 0;
+        this.FetchBehaviour("bax#21629", "lightning#23190", settings).then(
+          r => {
+            if (
+              this.state.matchesToShow.length > 1 ||
+              !this.state.canFetchAgain
+            ) {
+              document.querySelector(".loading-inner").style.opacity = 0;
+            }
+            this.setState({ isLoading: false });
           }
-          this.setState({ isLoading: false });
-        }); //"auriel#21174" tara#22686
+        ); //"auriel#21174" tara#22686
       }
     }
   }
@@ -289,7 +291,7 @@ class App extends Component {
       this.state.firstMembershipId +
       "/Character/" +
       this.state.characterIds[index] +
-      "/Stats/Activities/?count=200&mode=5&page=" +
+      "/Stats/Activities/?count=200&mode=32&page=" +
       currentPage;
 
     console.log(fetchUrl);
