@@ -1,9 +1,13 @@
 import React, { Component } from "react";
 import MatchEntry from "./MatchEntry";
+import Flickity from "react-flickity-component";
+
+import "../scripts/flickity.css";
 
 class StatBoxs extends Component {
   state = {
-    matchesToShowIndexes: [1, 4]
+    matchesToShowIndexes: [1, 4],
+    matchEntries: []
   };
 
   render() {
@@ -16,34 +20,11 @@ class StatBoxs extends Component {
       activitiesListCount,
       canFetchAgain
     } = this.props;
+
     return (
       <div className="container main-statsbox">
         <div className="container stats-box" style={{ "min-width": "430px" }}>
-          <div
-            class="main-carousel"
-            data-flickity='{ "cellAlign": "left", "contain": true }'
-          >
-            {matchesToShow
-              .slice(
-                this.state.matchesToShowIndexes[0],
-                this.state.matchesToShowIndexes[1]
-              )
-              .map(e => (
-                <div
-                  className="row align-items-center marginMLRow"
-                  key={e.activityDetails.instanceId}
-                >
-                  <MatchEntry
-                    matchMode={e.activityDetails.mode}
-                    matchDate={e.period}
-                    matchInstanceId={e.activityDetails.instanceId}
-                    matchPlayers={e.entries}
-                    firstMembershipId={firstMembershipId}
-                    secondMembershipId={secondMembershipId}
-                  />
-                </div>
-              ))}
-          </div>
+          {this.carouselBehaviour()}
         </div>
       </div>
     );
@@ -66,6 +47,47 @@ class StatBoxs extends Component {
         });
       }
     }
+  };
+
+  carouselBehaviour = () => {
+    const dividedArr = Array(
+      Math.ceil(this.props.matchesToShow.length / 3)
+    ).fill(0);
+
+    console.log("divided arr ", dividedArr.length);
+
+    var copyMatchArr = [...this.state.matchesToShowIndexes];
+
+    return (
+      <Flickity>
+        {dividedArr.map((e, i) => {
+          if (i !== 0) {
+            copyMatchArr[0] += 4;
+            copyMatchArr[1] += 4;
+          }
+
+          return this.props.matchesToShow
+            .slice(copyMatchArr[0], copyMatchArr[1])
+            .map(e => {
+              return (
+                <div
+                  className="row align-items-center marginMLRow"
+                  key={e.activityDetails.instanceId}
+                >
+                  <MatchEntry
+                    matchMode={e.activityDetails.mode}
+                    matchDate={e.period}
+                    matchInstanceId={e.activityDetails.instanceId}
+                    matchPlayers={e.entries}
+                    firstMembershipId={this.props.firstMembershipId}
+                    secondMembershipId={this.props.secondMembershipId}
+                  />
+                </div>
+              );
+            });
+        })}
+      </Flickity>
+    );
   };
 }
 

@@ -203,8 +203,21 @@ input[type="radio"]:checked + .logo-image {
 /* ///// */
 .carousel-cell {
   width: 100%; /* full width */
-  height: 160px; /* height of carousel */
   margin-right: 10px;
+}
+
+.carousel-cell {
+  width: 100%;
+  margin-right: 10px;
+  border-radius: 5px;
+  counter-increment: gallery-cell;
+}
+
+/* cell number */
+.carousel-cell:before {
+  display: block;
+  text-align: center;
+  color: white;
 }
 
 /* smaller, dark, rounded square */
