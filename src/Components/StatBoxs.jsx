@@ -7,7 +7,7 @@ import "../scripts/flickity.css";
 class StatBoxs extends Component {
   state = {
     matchesToShowIndexes: [1, 4],
-    matchEntries: []
+    threeMatches: []
   };
 
   render() {
@@ -22,10 +22,8 @@ class StatBoxs extends Component {
     } = this.props;
 
     return (
-      <div className="container main-statsbox">
-        <div className="container stats-box" style={{ "min-width": "430px" }}>
-          {this.carouselBehaviour()}
-        </div>
+      <div className="container main-statsbox" style={{ "min-width": "430px" }}>
+        <Flickity>{this.carouselBehaviour()}</Flickity>
       </div>
     );
   }
@@ -58,20 +56,20 @@ class StatBoxs extends Component {
 
     var copyMatchArr = [...this.state.matchesToShowIndexes];
 
-    return (
-      <Flickity>
-        {dividedArr.map((e, i) => {
-          if (i !== 0) {
-            copyMatchArr[0] += 4;
-            copyMatchArr[1] += 4;
-          }
+    return dividedArr.map((e, i) => {
+      if (i !== 0) {
+        copyMatchArr[0] += 3;
+        copyMatchArr[1] += 3;
+      }
 
-          return this.props.matchesToShow
-            .slice(copyMatchArr[0], copyMatchArr[1])
+      return (
+        <div className="col-12">
+          {this.props.matchesToShow
+            .slice(copyMatchArr[0], copyMatchArr[1]) //// first 0,4 then 4,8 ecc..
             .map(e => {
               return (
                 <div
-                  className="row align-items-center marginMLRow"
+                  className="row align-items-center"
                   key={e.activityDetails.instanceId}
                 >
                   <MatchEntry
@@ -84,10 +82,10 @@ class StatBoxs extends Component {
                   />
                 </div>
               );
-            });
-        })}
-      </Flickity>
-    );
+            })}
+        </div>
+      );
+    });
   };
 }
 
