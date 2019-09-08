@@ -242,12 +242,15 @@ input[type="radio"]:checked + .logo-image {
   border-top: 4px solid #a3e725e3;
   border-bottom: 4px solid #a3e725e3;
 
-  max-width: 90%;
-  margin-left: 3%;
-  margin-top: 25%;
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   min-width: 364px;
+}
+
+.SB {
+  max-width: 90%;
+  margin-left: 3%;
+  margin-top: 23%;
 }
 
 .nxt-page-container {

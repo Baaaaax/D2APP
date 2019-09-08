@@ -11,48 +11,34 @@ class StatBoxs extends Component {
   };
 
   render() {
-    const {
-      isLoading,
-      matchesToShow,
-      firstMembershipId,
-      secondMembershipId,
-      handleNext500Fetch,
-      activitiesListCount,
-      canFetchAgain
-    } = this.props;
-
+    const { handleNext500Fetch, canFetchAgain, isLoading } = this.props;
     return (
-      <div className="container main-statsbox" style={{ "min-width": "430px" }}>
-        <Flickity>{this.carouselBehaviour()}</Flickity>
+      <div className="container SB">
+        <button
+          type="button"
+          className="btn btn-info btn-md"
+          onClick={handleNext500Fetch}
+          disabled={!canFetchAgain && isLoading}
+        >
+          Next 500 matches
+        </button>
+
+        <div
+          className="container main-statsbox"
+          style={{ "min-width": "430px" }}
+        >
+          <Flickity>{this.carouselBehaviour()}</Flickity>
+        </div>
       </div>
     );
   }
 
-  handleClickPage = typeBtn => {
-    if (typeBtn === "prev") {
-      if (this.state.matchesToShowIndexes[0] > 1) {
-        this.setState({
-          matchesToShowIndexes: this.state.matchesToShowIndexes.map(e => e - 3)
-        });
-      }
-    } else {
-      if (
-        this.state.matchesToShowIndexes[1] <
-        this.props.matchesToShow.length - 1
-      ) {
-        this.setState({
-          matchesToShowIndexes: this.state.matchesToShowIndexes.map(e => e + 3)
-        });
-      }
-    }
-  };
+  handleClickPage = typeBtn => {};
 
   carouselBehaviour = () => {
-    const dividedArr = Array(
-      Math.ceil(this.props.matchesToShow.length / 3)
-    ).fill(0);
+    const { matchesToShow, firstMembershipId, secondMembershipId } = this.props;
 
-    console.log("divided arr ", dividedArr.length);
+    const dividedArr = Array(Math.ceil(matchesToShow.length / 3)).fill(0);
 
     var copyMatchArr = [...this.state.matchesToShowIndexes];
 
@@ -63,8 +49,8 @@ class StatBoxs extends Component {
       }
 
       return (
-        <div className="col-12">
-          {this.props.matchesToShow
+        <div className="col-12" key={i}>
+          {matchesToShow
             .slice(copyMatchArr[0], copyMatchArr[1]) //// first 0,4 then 4,8 ecc..
             .map(e => {
               return (
@@ -77,8 +63,8 @@ class StatBoxs extends Component {
                     matchDate={e.period}
                     matchInstanceId={e.activityDetails.instanceId}
                     matchPlayers={e.entries}
-                    firstMembershipId={this.props.firstMembershipId}
-                    secondMembershipId={this.props.secondMembershipId}
+                    firstMembershipId={firstMembershipId}
+                    secondMembershipId={secondMembershipId}
                   />
                 </div>
               );
