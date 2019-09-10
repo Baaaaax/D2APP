@@ -326,7 +326,7 @@ class App extends Component {
       this.state.firstMembershipId +
       "/Character/" +
       this.state.characterIds[index] +
-      "/Stats/Activities/?count=200&mode=32&page=" +
+      "/Stats/Activities/?count=200&mode=5&page=" +
       currentPage;
 
     console.log(fetchUrl);
@@ -462,18 +462,13 @@ class App extends Component {
       });
       document.querySelector(".loading-inner").style.opacity = 1;
     } else {
-      if (
-        // if the input changes we will reset and refetch
-        this.state.firstInputValue !== this.state.fName ||
-        this.state.secondInputValue !== this.state.sName
-      ) {
-        this.handleResetState();
-        this.setState({
-          isLoading: true,
-          btnFetchCount: this.state.btnFetchCount + 1
-        });
-        document.querySelector(".loading-inner").style.opacity = 1;
-      } else {
+      this.handleResetState();
+      this.setState({
+        isLoading: true,
+        btnFetchCount: this.state.btnFetchCount + 1
+      });
+      document.querySelector(".loading-inner").style.opacity = 1;
+      /*  else {
         // else we don't do a full fetch
         console.log("same name");
         this.setState({
@@ -482,7 +477,7 @@ class App extends Component {
           fullFetch: false
         });
         document.querySelector(".loading-inner").style.opacity = 1;
-      }
+      } */
     }
   };
 
