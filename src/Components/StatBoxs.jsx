@@ -7,7 +7,8 @@ import "../scripts/flickity.css";
 class StatBoxs extends Component {
   state = {
     matchesToShowIndexes: [1, 4],
-    threeMatches: []
+    threeMatches: [],
+    isPlayer: true // player:true enemny:false
   };
 
   render() {
@@ -16,16 +17,19 @@ class StatBoxs extends Component {
       <div className="container SB">
         <button
           type="button"
-          className="btn btn-info btn-md"
+          className="btn btn-primary btn-block"
           onClick={handleNext500Fetch}
-          disabled={!canFetchAgain && isLoading}
+          disabled={!canFetchAgain || isLoading}
         >
-          Next 500 matches
+          {canFetchAgain ? "Next 500 matches" : "No more matches.."}
         </button>
 
         <div
           className="container main-statsbox"
-          style={{ "min-width": "430px" }}
+          style={{
+            minWidth: "430",
+            borderColor: this.state.isPlayer ? "#a3e725e3" : "#f44336"
+          }}
         >
           <Flickity>{this.carouselBehaviour()}</Flickity>
         </div>
@@ -33,7 +37,9 @@ class StatBoxs extends Component {
     );
   }
 
-  handleClickPage = typeBtn => {};
+  handleDoubleClick = e => {
+    this.setState({ isPlayer: !this.state.isPlayer });
+  };
 
   carouselBehaviour = () => {
     const { matchesToShow, firstMembershipId, secondMembershipId } = this.props;
@@ -57,6 +63,7 @@ class StatBoxs extends Component {
                 <div
                   className="row align-items-center"
                   key={e.activityDetails.instanceId}
+                  onDoubleClick={e => this.handleDoubleClick(e)}
                 >
                   <MatchEntry
                     matchMode={e.activityDetails.mode}
@@ -65,6 +72,7 @@ class StatBoxs extends Component {
                     matchPlayers={e.entries}
                     firstMembershipId={firstMembershipId}
                     secondMembershipId={secondMembershipId}
+                    isPlayer={this.state.isPlayer}
                   />
                 </div>
               );

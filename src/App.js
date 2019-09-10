@@ -28,7 +28,9 @@ class App extends Component {
     matchesToShow: [{}],
     selectedCharacter: 0,
     moreMatchesToShow: false,
-    canFetchAgain: true
+    canFetchAgain: true,
+    foundError: false,
+    errorMessage: ""
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -94,19 +96,44 @@ class App extends Component {
                       </div>
                     )}
                     {!this.state.isLoading &&
-                      this.state.matchesToShow.length <= 1 && (
+                      this.state.matchesToShow.length <= 1 &&
+                      this.state.canFetchAgain &&
+                      !this.state.foundError && (
                         <div className="centered-spinner">
                           <p>No matches found...</p>
                           <button
                             type="button"
                             className="nxt-mtc-btn"
                             onClick={this.handleNext500Fetch}
-                            disabled={!this.state.canFetchAgain}
                           >
                             Search next 500..
                           </button>
                         </div>
                       )}
+                    {!this.state.isLoading && !this.state.canFetchAgain && (
+                      <div className="centered-spinner">
+                        <p>No more matches...</p>
+                        <button
+                          type="button"
+                          className="nxt-mtc-btn"
+                          onClick={this.handelGoBack}
+                        >
+                          Go back..
+                        </button>
+                      </div>
+                    )}
+                    {this.state.foundError && (
+                      <div className="centered-spinner">
+                        <p>{this.state.errorMessage}</p>
+                        <button
+                          type="button"
+                          className="nxt-mtc-btn"
+                          onClick={this.handelGoBack}
+                        >
+                          Go back..
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -120,16 +147,18 @@ class App extends Component {
   FetchBehaviour = async (firstInputName, secondInputName, settings) => {
     if (this.state.fullFetch) {
       await this.getMembershipsId(firstInputName, secondInputName, settings);
-      await this.getProfile(settings);
-      await this.getHistoricalStats(settings);
-      await this.getActivityHistory(settings);
-      if (this.state.hasFoundMatches) {
-        await this.getPostGameCarnageReport(
-          this.state.fetchStartEnd[0],
-          this.state.fetchStartEnd[1],
-          settings
-        );
-        await this.checkIfPlayed();
+      if (!this.state.foundError) {
+        await this.getProfile(settings);
+        await this.getHistoricalStats(settings);
+        await this.getActivityHistory(settings);
+        if (this.state.hasFoundMatches) {
+          await this.getPostGameCarnageReport(
+            this.state.fetchStartEnd[0],
+            this.state.fetchStartEnd[1],
+            settings
+          );
+          await this.checkIfPlayed();
+        }
       }
     } else {
       await this.getPostGameCarnageReport(
@@ -146,21 +175,26 @@ class App extends Component {
     const encodedName2 = encodeURIComponent(secondInputName);
 
     const firstFetchUrl =
-      "https://www.bungie.net/Platform/Destiny2/SearchDestinyPlayer/4/" +
+      "https://www.bungie.net/Platform/Destiny2/SearchDestinyPlayer/-1/" +
       encodedName +
       "/";
     const secondFetchUrl =
-      "https://www.bungie.net/Platform/Destiny2/SearchDestinyPlayer/4/" +
+      "https://www.bungie.net/Platform/Destiny2/SearchDestinyPlayer/-1/" +
       encodedName2 +
       "/";
 
     const response = await axios.get(firstFetchUrl, settings);
     const response2 = await axios.get(secondFetchUrl, settings);
 
-    this.setState({
-      firstMembershipId: response.data.Response[0].membershipId,
-      secondMembershipId: response2.data.Response[0].membershipId
-    });
+    console.log(response);
+    if (response.data.Response.length > 0) {
+      this.setState({
+        firstMembershipId: response.data.Response[0].membershipId,
+        secondMembershipId: response2.data.Response[0].membershipId
+      });
+    } else {
+      this.handleErrors(response.data.ErrorCode);
+    }
   };
 
   getProfile = async settings => {
@@ -330,8 +364,8 @@ class App extends Component {
       console.log(preV, curr);
 
       for (let i = 0; i < 3; i++) {
-        var requests = [...arr];
-        requests = arr.slice(preV, curr).map(e => {
+        var requests2 = [...arr];
+        requests2 = arr.slice(preV, curr).map(e => {
           if (e) {
             return this.pgcrFetch(e.activityDetails.instanceId, settings).then(
               a => {
@@ -343,7 +377,7 @@ class App extends Component {
           }
         });
 
-        const response = await Promise.all(requests);
+        const response = await Promise.all(requests2);
         console.log(response);
 
         this.setState(prevState => ({
@@ -359,8 +393,8 @@ class App extends Component {
           curr = curr + 250;
 
           if (curr === this.state.fetchStartEnd[1] + 250) {
-            var arr1d = [].concat(...this.state.matchEntryPGCR).slice(1);
-            this.setState({ matchEntryPGCR: arr1d });
+            var ar1d = [].concat(...this.state.matchEntryPGCR).slice(1);
+            this.setState({ matchEntryPGCR: ar1d });
             break;
           }
         }
@@ -464,6 +498,11 @@ class App extends Component {
     });
   };
 
+  handelGoBack = () => {
+    document.querySelector(".loading-inner").style.opacity = 0;
+    this.handleResetState();
+  };
+
   handleResetState = () => {
     this.setState({
       fullFetch: true,
@@ -480,11 +519,25 @@ class App extends Component {
       fName: "",
       sName: "",
       fetchStartEnd: [0, 500],
-      canFetchAgain: true
+      canFetchAgain: true,
+      foundError: false,
+      errorMessage: ""
     });
   };
   setDelay = i => {
     setTimeout(i, 3000);
+  };
+
+  handleErrors = typeErr => {
+    switch (typeErr) {
+      case 1:
+        this.setState({
+          isLoading: false,
+          foundError: true,
+          errorMessage: "No player found.."
+        });
+        break;
+    }
   };
 
   // handleClickNextPage = () => {

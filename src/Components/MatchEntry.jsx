@@ -9,14 +9,7 @@ class MatchEntry extends Component {
   };
 
   render() {
-    const {
-      matchMode,
-      matchDate,
-      matchInstanceId,
-      matchPlayers,
-      firstMembershipId,
-      secondMembershipId
-    } = this.props;
+    const { matchMode, matchDate, matchInstanceId, matchPlayers } = this.props;
 
     return (
       <React.Fragment>
@@ -24,6 +17,7 @@ class MatchEntry extends Component {
           <a
             href={`https://destinytracker.com/d2/pgcr/${matchInstanceId}`}
             className="title"
+            target="_blank"
           >
             {this.decodeMap(matchMode)}
           </a>
@@ -42,10 +36,10 @@ class MatchEntry extends Component {
               <span>KDA</span>
             </div>
             <div className="col txt-center">
-              <span>KILL</span>
+              <span>KILLS</span>
             </div>
             <div className="col txt-center">
-              <span>DEATH</span>
+              <span>DEATHS</span>
             </div>
           </div>
         </div>
@@ -54,22 +48,35 @@ class MatchEntry extends Component {
         <div className="col">
           <div className="row align-items-end">
             <div className="col txt-center">
-              <span>{this.getStats(matchPlayers, firstMembershipId, 0)}</span>
+              <span>
+                {this.getStats(matchPlayers, this.returnPlayerOrEnemy(), 0)}
+              </span>
             </div>
             <div className="col txt-center">
-              <span>{this.getStats(matchPlayers, firstMembershipId, 1)}</span>
+              <span>
+                {this.getStats(matchPlayers, this.returnPlayerOrEnemy(), 1)}
+              </span>
             </div>
             <div className="col txt-center">
-              <span>{this.getStats(matchPlayers, firstMembershipId, 2)}</span>
+              <span>
+                {this.getStats(matchPlayers, this.returnPlayerOrEnemy(), 2)}
+              </span>
             </div>
             <div className="col txt-center">
-              <span>{this.getStats(matchPlayers, firstMembershipId, 3)}</span>
+              <span>
+                {this.getStats(matchPlayers, this.returnPlayerOrEnemy(), 3)}
+              </span>
             </div>
           </div>
         </div>
       </React.Fragment>
     );
   }
+
+  returnPlayerOrEnemy = () => {
+    const { isPlayer, firstMembershipId, secondMembershipId } = this.props;
+    return isPlayer ? firstMembershipId : secondMembershipId;
+  };
 
   decodeMap = mode => {
     const codedModeList = {

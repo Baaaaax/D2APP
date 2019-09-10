@@ -7,7 +7,7 @@ body {
 }
 
 .wrapper {
-  background-color: #bad375;
+  background-color: #503d3f;
   height: 100vh;
   display: flex;
   justify-content: center;
@@ -28,7 +28,7 @@ body {
 
 .title-container {
   height: 90vh;
-  background-color: #f15e41;
+  background-color: #52ffb8;
   background-size: cover;
   display: flex;
   align-items: center;
@@ -54,7 +54,7 @@ body {
 }
 
 .form-container {
-  background-color: #bad375;
+  background-color: #615756;
   //background-image: linear-gradient(60deg, #29323c 0%, #485563 100%);
   height: 90vh;
   padding-top: 50px;
@@ -129,7 +129,8 @@ body {
   text-align: center;
   margin-top: 45%;
 }
-/* /////////////////////////*/
+
+/* Input and submit stuffs*/
 
 .input-container {
   text-align: center;
@@ -144,6 +145,7 @@ body {
 #submitBtn {
   width: 50%;
   text-align: center;
+  background-color: #4dfff3;
 }
 input[type="text"] {
   outline: none;
@@ -151,7 +153,7 @@ input[type="text"] {
 input[type="text"] {
   background-color: transparent;
   border: 0;
-  border-bottom: solid 1px #f15e41;
+  border-bottom: solid 1px #4dfff3;
   width: 100%;
   padding-bottom: 4px;
   color: #fff !important;
@@ -166,12 +168,14 @@ input:focus {
 }
 ::-webkit-input-placeholder {
   text-align: center;
+  color: #4dfff3;
 }
 input[placeholder] {
   text-align: center;
+  color: #4dfff3;
 }
 
-/* ///////////////////*/
+/* Characters stuff*/
 
 .char-cont {
   max-width: 50%;
@@ -196,7 +200,67 @@ input[placeholder] {
 }
 
 input[type="radio"]:checked + .logo-image {
-  border-bottom: 2px solid #f15e41;
+  border-bottom: 2px solid #4dfff3;
+}
+
+///Checkboxs Stuff
+.check {
+  cursor: pointer;
+  position: relative;
+  margin: auto;
+  width: 18px;
+  height: 18px;
+  -webkit-tap-highlight-color: transparent;
+  transform: translate3d(0, 0, 0);
+}
+.check:before {
+  content: "";
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(34, 50, 84, 0.03);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.check svg {
+  position: relative;
+  z-index: 1;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke: #c8ccd4;
+  stroke-width: 1.5;
+  transform: translate3d(0, 0, 0);
+  transition: all 0.2s ease;
+}
+.check svg path {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 0;
+}
+.check svg polyline {
+  stroke-dasharray: 22;
+  stroke-dashoffset: 66;
+}
+.check:hover:before {
+  opacity: 1;
+}
+.check:hover svg {
+  stroke: #4285f4;
+}
+#cbx:checked + .check svg {
+  stroke: #4285f4;
+}
+#cbx:checked + .check svg path {
+  stroke-dashoffset: 60;
+  transition: all 0.3s linear;
+}
+#cbx:checked + .check svg polyline {
+  stroke-dashoffset: 42;
+  transition: all 0.2s linear;
+  transition-delay: 0.15s;
 }
 
 // CAROUSEL
@@ -237,10 +301,7 @@ input[type="radio"]:checked + .logo-image {
   background-color: #282828;
 
   border-radius: 6px;
-  border-left: 4px solid #a3e725e3;
-  border-right: 4px solid #a3e725e3;
-  border-top: 4px solid #a3e725e3;
-  border-bottom: 4px solid #a3e725e3;
+  border: 4px solid #a3e725e3;
 
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
