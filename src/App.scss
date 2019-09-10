@@ -28,7 +28,8 @@ body {
 
 .title-container {
   height: 90vh;
-  background-color: #52ffb8;
+  background-color: #4dfff3;
+
   background-size: cover;
   display: flex;
   align-items: center;
@@ -73,7 +74,7 @@ body {
   position: relative;
 }
 .loading-outer .loading-inner {
-  background: #fd8698;
+  background: #52ffb8;
   height: 100%;
   width: 100%;
   opacity: 0;
@@ -145,7 +146,8 @@ body {
 #submitBtn {
   width: 50%;
   text-align: center;
-  background-color: #4dfff3;
+  background-color: #52ffb8;
+  color: #503d3f;
 }
 input[type="text"] {
   outline: none;
@@ -153,7 +155,7 @@ input[type="text"] {
 input[type="text"] {
   background-color: transparent;
   border: 0;
-  border-bottom: solid 1px #4dfff3;
+  border-bottom: solid 1px #52ffb8;
   width: 100%;
   padding-bottom: 4px;
   color: #fff !important;
@@ -168,17 +170,17 @@ input:focus {
 }
 ::-webkit-input-placeholder {
   text-align: center;
-  color: #4dfff3;
+  color: #52ffb8;
 }
 input[placeholder] {
   text-align: center;
-  color: #4dfff3;
+  color: #52ffb8;
 }
 
 /* Characters stuff*/
 
 .char-cont {
-  max-width: 50%;
+  max-width: 40%;
 }
 .inputRadio {
   -webkit-appearance: none;
@@ -200,7 +202,7 @@ input[placeholder] {
 }
 
 input[type="radio"]:checked + .logo-image {
-  border-bottom: 2px solid #4dfff3;
+  border-bottom: 2px solid #52ffb8;
 }
 
 ///Checkboxs Stuff

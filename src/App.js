@@ -128,7 +128,7 @@ class App extends Component {
                         <button
                           type="button"
                           className="nxt-mtc-btn"
-                          onClick={this.handelGoBack}
+                          onClick={this.handleGoBack}
                         >
                           Go back..
                         </button>
@@ -308,6 +308,7 @@ class App extends Component {
         // check if we finded matches
         console.log("no matches found");
         this.setState({ hasFoundMatches: false });
+        this.handleErrors(2);
       } else {
         this.setState({ hasFoundMatches: true });
         this.setState({ activitiesList: arr1d });
@@ -498,7 +499,7 @@ class App extends Component {
     });
   };
 
-  handelGoBack = () => {
+  handleGoBack = () => {
     document.querySelector(".loading-inner").style.opacity = 0;
     this.handleResetState();
   };
@@ -537,6 +538,12 @@ class App extends Component {
           errorMessage: "No player found.."
         });
         break;
+      case 2:
+        this.setState({
+          isLoading: false,
+          foundError: true,
+          errorMessage: "No matches found.."
+        });
     }
   };
 

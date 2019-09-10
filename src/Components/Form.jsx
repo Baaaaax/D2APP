@@ -44,8 +44,8 @@ const Form = props => {
               />
             </div>
           </div>
-          <div className="row">
-            <div className="col-6 char-cont">
+          <div className="row justify-content-around">
+            <div className="col-4 char-cont">
               <div className="row">
                 <div className="col-4">
                   <label className="logo-label">
@@ -91,7 +91,7 @@ const Form = props => {
                 </div>
               </div>
             </div>
-            <div className="col-6">
+            <div className="col-4" style={{ paddingTop: "2%" }}>
               <input type="checkbox" id="cbx" style={{ display: "none" }} />
               <label for="cbx" class="check">
                 <svg width="18px" height="18px" viewBox="0 0 18 18">
@@ -99,7 +99,7 @@ const Form = props => {
                   <polyline points="1 9 7 14 15 4"></polyline>
                 </svg>
               </label>
-              <span>Private Matches</span>
+              <span style={{ marginLeft: "10%" }}>Private Matches</span>
             </div>
           </div>
         </div>
