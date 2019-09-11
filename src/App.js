@@ -8,14 +8,18 @@ const axios = require("axios");
 
 class App extends Component {
   state = {
+    // 0 = Full fetch , 1 = character or isPrivate change
+    // 2 = only check second input fastfetch
+    typeFetch: 0,
     fullFetch: true,
     btnFetchCount: 0,
     fetchStartEnd: [0, 500],
     isLoading: false,
+    isPrivate: false,
     firstInputValue: "",
     secondInputValue: "",
-    fName: "",
-    sName: "",
+    previousFirstName: "",
+    previousSecondName: "",
     firstMembershipId: "",
     secondMembershipId: "",
     membershipType: 0,
@@ -27,6 +31,7 @@ class App extends Component {
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
     selectedCharacter: 0,
+    previousCharacter: 0,
     moreMatchesToShow: false,
     canFetchAgain: true,
     foundError: false,
@@ -43,17 +48,15 @@ class App extends Component {
           }
         };
 
-        this.FetchBehaviour("bax#21629", "lightning#23190", settings).then(
-          r => {
-            if (
-              this.state.matchesToShow.length > 1 ||
-              !this.state.canFetchAgain
-            ) {
-              document.querySelector(".loading-inner").style.opacity = 0;
-            }
-            this.setState({ isLoading: false });
+        this.FetchBehaviour(settings).then(r => {
+          if (
+            this.state.matchesToShow.length > 1 ||
+            !this.state.canFetchAgain
+          ) {
+            document.querySelector(".loading-inner").style.opacity = 0;
           }
-        ); //"auriel#21174" tara#22686
+          this.setState({ isLoading: false });
+        }); //"auriel#21174" tara#22686
       }
     }
   }
@@ -144,33 +147,95 @@ class App extends Component {
     );
   }
 
-  FetchBehaviour = async (firstInputName, secondInputName, settings) => {
+  setPreviousBehaviour = async (name, secName, char, isPriv) => {
+    this.setState({
+      previousFirstName: name,
+      previousSecondName: secName,
+      previousCharacter: char,
+      previousIsPrivate: isPriv
+    });
+  };
+
+  FetchBehaviour = async settings => {
+    const {
+      typeFetch,
+      firstInputValue,
+      secondInputValue,
+      selectedCharacter,
+      isPrivate,
+      fetchStartEnd
+    } = this.state;
     if (this.state.fullFetch) {
-      await this.getMembershipsId(firstInputName, secondInputName, settings);
-      if (!this.state.foundError) {
-        await this.getProfile(settings);
-        await this.getHistoricalStats(settings);
-        await this.getActivityHistory(settings);
-        if (this.state.hasFoundMatches) {
-          await this.getPostGameCarnageReport(
-            this.state.fetchStartEnd[0],
-            this.state.fetchStartEnd[1],
+      switch (typeFetch) {
+        case 0:
+          await this.setPreviousBehaviour(
+            firstInputValue,
+            secondInputValue,
+            selectedCharacter,
+            isPrivate
+          );
+          await this.getMembershipsId(
+            firstInputValue,
+            secondInputValue,
             settings
           );
-          await this.checkIfPlayed();
-        }
+          if (!this.state.foundError) {
+            await this.getProfile(settings);
+            await this.getHistoricalStats(settings);
+            await this.getActivityHistory(settings);
+
+            if (this.state.hasFoundMatches) {
+              await this.getPostGameCarnageReport(
+                fetchStartEnd[0],
+                fetchStartEnd[1],
+                settings
+              );
+              await this.checkIfPlayed();
+            }
+          }
+          break;
+
+        case 1:
+          await this.setPreviousBehaviour(
+            firstInputValue,
+            secondInputValue,
+            selectedCharacter,
+            isPrivate
+          );
+          await this.getActivityHistory(settings);
+          if (this.state.hasFoundMatches) {
+            await this.getPostGameCarnageReport(
+              fetchStartEnd[0],
+              fetchStartEnd[1],
+              settings
+            );
+            await this.checkIfPlayed();
+          }
+          break;
+        case 2:
+          await this.setPreviousBehaviour(
+            "bax#21629",
+            "lightning#23190",
+            selectedCharacter,
+            isPrivate
+          );
+          await this.getMembershipsId("bax#21629", "lightning#23190", settings);
+          if (!this.state.foundError) {
+            await this.checkIfPlayed();
+          }
+
+          break;
       }
     } else {
       await this.getPostGameCarnageReport(
-        this.state.fetchStartEnd[0],
-        this.state.fetchStartEnd[1],
+        fetchStartEnd[0],
+        fetchStartEnd[1],
         settings
       );
       await this.checkIfPlayed();
     }
   };
   getMembershipsId = async (firstInputName, secondInputName, settings) => {
-    this.setState({ fName: firstInputName, sName: secondInputName });
     const encodedName = encodeURIComponent(firstInputName);
     const encodedName2 = encodeURIComponent(secondInputName);
 
@@ -326,7 +391,7 @@ class App extends Component {
       this.state.firstMembershipId +
       "/Character/" +
       this.state.characterIds[index] +
-      "/Stats/Activities/?count=200&mode=5&page=" +
+      "/Stats/Activities/?count=200&mode=32&page=" +
       currentPage;
 
     console.log(fetchUrl);
@@ -347,11 +412,15 @@ class App extends Component {
           return e !== "error";
         })
         .map(f => {
-          return this.pgcrFetch(f.activityDetails.instanceId, settings).then(
-            a => {
-              return a;
-            }
-          );
+          if (f) {
+            return this.pgcrFetch(f.activityDetails.instanceId, settings).then(
+              a => {
+                return a;
+              }
+            );
+          } else {
+            return "error";
+          }
         });
 
       var response = await Promise.all(requests);
@@ -454,31 +523,55 @@ class App extends Component {
   };
 
   handleClickFetch = () => {
-    if (this.state.btnFetchCount === 0) {
-      // If is the first time we click
-      this.setState({
-        isLoading: true,
-        btnFetchCount: this.state.btnFetchCount + 1
-      });
-      document.querySelector(".loading-inner").style.opacity = 1;
-    } else {
-      this.handleResetState();
-      this.setState({
-        isLoading: true,
-        btnFetchCount: this.state.btnFetchCount + 1
-      });
-      document.querySelector(".loading-inner").style.opacity = 1;
-      /*  else {
-        // else we don't do a full fetch
-        console.log("same name");
-        this.setState({
-          isLoading: true,
-          btnFetchCount: this.state.btnFetchCount + 1,
-          fullFetch: false
-        });
-        document.querySelector(".loading-inner").style.opacity = 1;
-      } */
+    // if there is something typed
+    if (
+      this.state.firstInputValue !== "" &&
+      this.state.secondInputValue !== ""
+    ) {
+      if (this.state.btnFetchCount === 0) {
+        // If is the first time we click we will do a FULL FETCH
+        this.settingLoadingState(0);
+      } else {
+        // if the first username remain the same
+        if (this.state.previousFirstName === this.state.firstInputValue) {
+          // if the second username remain the same
+          if (this.state.previousSecondName === this.state.secondInputValue) {
+            // if the character changes or IsPrivate changes
+            if (
+              this.state.previousCharacter !== this.state.selectedCharacter ||
+              this.state.previousIsPrivate !== this.state.isPrivate
+            ) {
+              console.log("changed character or IsPrivate");
+              this.settingLoadingState(1);
+            } // else they are all the same we return
+            else {
+              console.log("all same");
+              return;
+            }
+          }
+          // else only the second username changes , we do a fastFetch
+          else {
+            console.log("only the second changes , we do a fast fetch");
+            this.settingLoadingState(2);
+          }
+        }
+        // else the first username changed , we do a full fetch
+        else {
+          console.log("first input changed , we do a full fetch");
+          this.handleResetState();
+          this.settingLoadingState(0);
+        }
+      }
     }
+  };
+
+  settingLoadingState = typeFetch => {
+    this.setState({
+      isLoading: true,
+      btnFetchCount: this.state.btnFetchCount + 1,
+      typeFetch: typeFetch
+    });
+    document.querySelector(".loading-inner").style.opacity = 1;
   };
 
   handleNext500Fetch = () => {
@@ -501,6 +594,7 @@ class App extends Component {
 
   handleResetState = () => {
     this.setState({
+      typeFetch: 0,
       fullFetch: true,
       firstMembershipId: "",
       secondMembershipId: "",
@@ -512,12 +606,14 @@ class App extends Component {
       hasFoundMatches: false,
       matchEntryPGCR: [{}],
       matchesToShow: [{}],
-      fName: "",
-      sName: "",
+      previousFirstName: "",
+      previousSecondName: "",
       fetchStartEnd: [0, 500],
       canFetchAgain: true,
+      previousCharacter: 0,
       foundError: false,
-      errorMessage: ""
+      errorMessage: "",
+      isPrivate: false
     });
   };
   setDelay = i => {
