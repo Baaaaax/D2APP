@@ -44,7 +44,7 @@ class StatBoxs extends Component {
   carouselBehaviour = () => {
     const { matchesToShow, firstMembershipId, secondMembershipId } = this.props;
 
-    const dividedArr = Array(Math.ceil(matchesToShow.length / 3)).fill(0);
+    const dividedArr = Array(Math.ceil((matchesToShow.length - 1) / 3)).fill(0);
 
     var copyMatchArr = [...this.state.matchesToShowIndexes];
 
@@ -58,11 +58,11 @@ class StatBoxs extends Component {
         <div className="col-12" key={i}>
           {matchesToShow
             .slice(copyMatchArr[0], copyMatchArr[1]) //// first 0,4 then 4,8 ecc..
-            .map(e => {
+            .map((e, i) => {
               return (
                 <div
                   className="row align-items-center"
-                  key={e.activityDetails.instanceId}
+                  key={i}
                   onDoubleClick={e => this.handleDoubleClick(e)}
                 >
                   <MatchEntry

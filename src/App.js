@@ -214,12 +214,16 @@ class App extends Component {
           break;
         case 2:
           await this.setPreviousBehaviour(
-            "bax#21629",
-            "lightning#23190",
+            firstInputValue,
+            secondInputValue,
             selectedCharacter,
             isPrivate
           );
-          await this.getMembershipsId("bax#21629", "lightning#23190", settings);
+          await this.getMembershipsId(
+            firstInputValue,
+            secondInputValue,
+            settings
+          );
           if (!this.state.foundError) {
             await this.checkIfPlayed();
           }
@@ -342,7 +346,11 @@ class App extends Component {
     var arr = Array(this.state.activitiesListCount).fill(0);
 
     if (arr.length <= 200) {
-      return this.activityFetch(settings, 0);
+      const res = await this.activityFetch(settings, 0);
+      this.setState({
+        activitiesList: res.data.Response.activities,
+        hasFoundMatches: true
+      });
     } else {
       var requests = [...arr];
 
@@ -426,7 +434,8 @@ class App extends Component {
       var response = await Promise.all(requests);
       console.log(response);
       this.setState({
-        matchEntryPGCR: response
+        matchEntryPGCR: response,
+        canFetchAgain: false
       });
     } else {
       var preV = start;
@@ -542,6 +551,13 @@ class App extends Component {
               this.state.previousIsPrivate !== this.state.isPrivate
             ) {
               console.log("changed character or IsPrivate");
+              this.setState({
+                fetchStartEnd: [0, 500],
+                activitiesList: [],
+                matchEntryPGCR: [{}],
+                matchesToShow: [{}],
+                hasFoundMatches: false
+              });
               this.settingLoadingState(1);
             } // else they are all the same we return
             else {
