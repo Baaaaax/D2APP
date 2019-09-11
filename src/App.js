@@ -49,10 +49,7 @@ class App extends Component {
         };
 
         this.FetchBehaviour(settings).then(r => {
-          if (
-            this.state.matchesToShow.length > 1 ||
-            !this.state.canFetchAgain
-          ) {
+          if (this.state.matchesToShow.length > 1) {
             document.querySelector(".loading-inner").style.opacity = 0;
           }
           this.setState({ isLoading: false });
@@ -113,18 +110,23 @@ class App extends Component {
                           </button>
                         </div>
                       )}
-                    {!this.state.isLoading && !this.state.canFetchAgain && (
-                      <div className="centered-spinner">
-                        <p>No more matches...</p>
-                        <button
-                          type="button"
-                          className="nxt-mtc-btn"
-                          onClick={this.handelGoBack}
-                        >
-                          Go back..
-                        </button>
-                      </div>
-                    )}
+                    {!this.state.isLoading &&
+                      !this.state.canFetchAgain &&
+                      !this.state.foundError && (
+                        <div className="centered-spinner">
+                          <p>
+                            {this.state.firstInputValue} never played against{" "}
+                            {this.state.secondInputValue}
+                          </p>
+                          <button
+                            type="button"
+                            className="nxt-mtc-btn"
+                            onClick={this.handleGoBack}
+                          >
+                            Go back..
+                          </button>
+                        </div>
+                      )}
                     {this.state.foundError && (
                       <div className="centered-spinner">
                         <p>{this.state.errorMessage}</p>
@@ -202,6 +204,7 @@ class App extends Component {
             selectedCharacter,
             isPrivate
           );
+          await this.getHistoricalStats(settings);
           await this.getActivityHistory(settings);
           if (this.state.hasFoundMatches) {
             await this.getPostGameCarnageReport(
@@ -336,6 +339,7 @@ class App extends Component {
       "/Stats/";
 
     const response = await axios.get(fetchUrl, settings);
+    console.log("hisroty ", response);
     this.setState({
       activitiesListCount:
         response.data.Response.allPvP.allTime.activitiesEntered.basic.value
@@ -414,7 +418,7 @@ class App extends Component {
   getPostGameCarnageReport = async (start, end, settings) => {
     var arr = this.state.activitiesList;
 
-    if (arr.length < 250) {
+    if (arr.length < 250 && arr.length > 0) {
       var requests = arr
         .filter(e => {
           return e !== "error";
@@ -605,7 +609,11 @@ class App extends Component {
 
   handleGoBack = () => {
     document.querySelector(".loading-inner").style.opacity = 0;
-    this.handleResetState();
+    this.setState({
+      activitiesList: [],
+      matchEntryPGCR: [{}],
+      canFetchAgain: true
+    });
   };
 
   handleResetState = () => {
