@@ -110,30 +110,16 @@ class App extends Component {
                           </button>
                         </div>
                       )}
-                    {!this.state.isLoading &&
-                      !this.state.canFetchAgain &&
-                      !this.state.foundError && (
-                        <div className="centered-spinner">
-                          <p>
-                            {this.state.firstInputValue} never played against{" "}
-                            {this.state.secondInputValue}
-                          </p>
-                          <button
-                            type="button"
-                            className="nxt-mtc-btn"
-                            onClick={this.handleGoBack}
-                          >
-                            Go back..
-                          </button>
-                        </div>
-                      )}
-                    {this.state.foundError && (
+
+                    {!this.state.isLoading && this.state.foundError && (
                       <div className="centered-spinner">
                         <p>{this.state.errorMessage}</p>
                         <button
                           type="button"
                           className="nxt-mtc-btn"
-                          onClick={this.handleGoBack}
+                          onClick={() => {
+                            return this.handleGoBack(false);
+                          }}
                         >
                           Go back..
                         </button>
@@ -193,6 +179,15 @@ class App extends Component {
                 settings
               );
               await this.checkIfPlayed();
+              if (this.state.matchesToShow.length <= 1) {
+                this.setState({
+                  foundError: true,
+                  errorMessage:
+                    this.state.firstInputValue +
+                    " never played against " +
+                    this.state.secondInputValue
+                });
+              }
             }
           }
           break;
@@ -229,6 +224,15 @@ class App extends Component {
           );
           if (!this.state.foundError) {
             await this.checkIfPlayed();
+            if (this.state.matchesToShow.length <= 1) {
+              this.setState({
+                foundError: true,
+                errorMessage:
+                  this.state.firstInputValue +
+                  " never played against " +
+                  this.state.secondInputValue
+              });
+            }
           }
 
           break;
@@ -259,13 +263,21 @@ class App extends Component {
     const response2 = await axios.get(secondFetchUrl, settings);
 
     console.log(response);
-    if (response.data.Response.length > 0) {
+    console.log(response2);
+    if (
+      response.data.Response.length > 0 &&
+      response2.data.Response.length > 0
+    ) {
       this.setState({
         firstMembershipId: response.data.Response[0].membershipId,
         secondMembershipId: response2.data.Response[0].membershipId
       });
     } else {
-      this.handleErrors(response.data.ErrorCode);
+      if (response.data.Response.length <= 0) {
+        this.handleErrors(1, firstInputName);
+      } else {
+        this.handleErrors(1, secondInputName);
+      }
     }
   };
 
@@ -385,7 +397,7 @@ class App extends Component {
         // check if we finded matches
         console.log("no matches found");
         this.setState({ hasFoundMatches: false });
-        this.handleErrors(2);
+        this.handleErrors(2, "");
       } else {
         this.setState({ hasFoundMatches: true });
         this.setState({ activitiesList: arr1d });
@@ -572,6 +584,7 @@ class App extends Component {
           // else only the second username changes , we do a fastFetch
           else {
             console.log("only the second changes , we do a fast fetch");
+            this.setState({ matchesToShow: [{}] });
             this.settingLoadingState(2);
           }
         }
@@ -607,13 +620,21 @@ class App extends Component {
     });
   };
 
-  handleGoBack = () => {
+  handleGoBack = fullReset => {
     document.querySelector(".loading-inner").style.opacity = 0;
-    this.setState({
-      activitiesList: [],
-      matchEntryPGCR: [{}],
-      canFetchAgain: true
-    });
+    if (fullReset) {
+      this.setState({
+        activitiesList: [],
+        matchEntryPGCR: [{}],
+        canFetchAgain: true,
+        foundError: false
+      });
+    } else {
+      this.setState({
+        canFetchAgain: true,
+        foundError: false
+      });
+    }
   };
 
   handleResetState = () => {
@@ -644,13 +665,13 @@ class App extends Component {
     setTimeout(i, 3000);
   };
 
-  handleErrors = typeErr => {
+  handleErrors = (typeErr, messErr) => {
     switch (typeErr) {
       case 1:
         this.setState({
           isLoading: false,
           foundError: true,
-          errorMessage: "No player found.."
+          errorMessage: "Can't find " + messErr
         });
         break;
       case 2:
