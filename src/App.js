@@ -26,14 +26,14 @@ class App extends Component {
     characterIds: [], //titan 0,hunter 1 , warlock 2 ,
     classHashes: [0, 0, 0],
     activitiesList: [],
-    activitiesListCount: 0,
+    activitiesListCount: [0, 0], //0 all , 1 private matches
     hasFoundMatches: false,
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
     selectedCharacter: 0,
     previousCharacter: 0,
     moreMatchesToShow: false,
-    canFetchAgain: true,
+    canFetchAgain: false,
     foundError: false,
     errorMessage: ""
   };
@@ -76,6 +76,7 @@ class App extends Component {
                     isLoading={this.state.isLoading}
                     hasFoundResults={this.state.hasFoundResults}
                     onCharacterChange={this.onCharacterChange}
+                    onIsPrivateChange={this.onIsPrivateChange}
                   />
 
                   {this.state.matchesToShow.length > 1 && (
@@ -151,8 +152,13 @@ class App extends Component {
       secondInputValue,
       selectedCharacter,
       isPrivate,
-      fetchStartEnd
+      fetchStartEnd,
+      activitiesListCount
     } = this.state;
+
+    var actListCount = isPrivate
+      ? activitiesListCount[1]
+      : activitiesListCount[0];
     if (this.state.fullFetch) {
       switch (typeFetch) {
         case 0:
@@ -179,9 +185,12 @@ class App extends Component {
                 settings
               );
               await this.checkIfPlayed();
-              if (this.state.matchesToShow.length <= 1) {
+              if (
+                this.state.matchesToShow.length <= 1 &&
+                this.state.fetchStartEnd[1] >= actListCount
+              ) {
                 this.setState({
-                  foundError: true,
+                  foundError: false,
                   errorMessage:
                     this.state.firstInputValue +
                     " never played against " +
@@ -224,9 +233,12 @@ class App extends Component {
           );
           if (!this.state.foundError) {
             await this.checkIfPlayed();
-            if (this.state.matchesToShow.length <= 1) {
+            if (
+              this.state.matchesToShow.length <= 1 &&
+              this.state.fetchStartEnd[1] >= actListCount
+            ) {
               this.setState({
-                foundError: true,
+                foundError: false,
                 errorMessage:
                   this.state.firstInputValue +
                   " never played against " +
@@ -244,6 +256,18 @@ class App extends Component {
         settings
       );
       await this.checkIfPlayed();
+      if (
+        this.state.matchesToShow.length <= 1 &&
+        this.state.fetchStartEnd[1] >= actListCount
+      ) {
+        this.setState({
+          foundError: true,
+          errorMessage:
+            this.state.firstInputValue +
+            " never played against " +
+            this.state.secondInputValue
+        });
+      }
     }
   };
   getMembershipsId = async (firstInputName, secondInputName, settings) => {
@@ -348,21 +372,27 @@ class App extends Component {
       this.state.firstMembershipId +
       "/Character/" +
       this.state.characterIds[this.state.selectedCharacter] +
-      "/Stats/";
+      "/Stats/?modes=5,32";
 
     const response = await axios.get(fetchUrl, settings);
     console.log("hisroty ", response);
     this.setState({
-      activitiesListCount:
-        response.data.Response.allPvP.allTime.activitiesEntered.basic.value
+      activitiesListCount: [
+        response.data.Response.allPvP.allTime.activitiesEntered.basic.value,
+        response.data.Response.privateMatches.allTime.activitiesEntered.basic
+          .value
+      ]
     });
   };
 
   getActivityHistory = async settings => {
-    var arr = Array(this.state.activitiesListCount).fill(0);
+    var actListCount = this.state.isPrivate
+      ? this.state.activitiesListCount[1]
+      : this.state.activitiesListCount[0];
+    var arr = Array(actListCount).fill(0);
 
     if (arr.length <= 200) {
-      const res = await this.activityFetch(settings, 0);
+      const res = await this.activityFetch(settings, 0, this.state.isPrivate);
       this.setState({
         activitiesList: res.data.Response.activities,
         hasFoundMatches: true
@@ -379,7 +409,7 @@ class App extends Component {
       var currPg = 0;
       var req = requests.map(e => {
         currPg++;
-        return this.activityFetch(settings, currPg - 1);
+        return this.activityFetch(settings, currPg - 1, this.state.isPrivate);
       });
 
       const response = await Promise.all(req);
@@ -405,9 +435,10 @@ class App extends Component {
     }
   };
 
-  activityFetch = async (settings, currentPage) => {
+  activityFetch = async (settings, currentPage, isPriv) => {
     var index = this.state.selectedCharacter;
-    console.log(index);
+    var mode = isPriv ? 32 : 5;
+
     const fetchUrl =
       "https://www.bungie.net/Platform/Destiny2/" +
       this.state.membershipType +
@@ -415,7 +446,9 @@ class App extends Component {
       this.state.firstMembershipId +
       "/Character/" +
       this.state.characterIds[index] +
-      "/Stats/Activities/?count=200&mode=32&page=" +
+      "/Stats/Activities/?count=200&mode=" +
+      mode +
+      "&page=" +
       currentPage;
 
     console.log(fetchUrl);
@@ -454,6 +487,7 @@ class App extends Component {
         canFetchAgain: false
       });
     } else {
+      this.setState({ canFetchAgain: true });
       var preV = start;
       var curr = preV + 250;
       console.log(preV, curr);
@@ -547,6 +581,10 @@ class App extends Component {
     this.setState({ selectedCharacter: e.target.value });
   };
 
+  onIsPrivateChange = e => {
+    this.setState({ isPrivate: e.target.checked });
+  };
+
   handleClickFetch = () => {
     // if there is something typed
     if (
@@ -626,13 +664,15 @@ class App extends Component {
       this.setState({
         activitiesList: [],
         matchEntryPGCR: [{}],
-        canFetchAgain: true,
-        foundError: false
+        canFetchAgain: false,
+        foundError: false,
+        errorMessage: ""
       });
     } else {
       this.setState({
-        canFetchAgain: true,
-        foundError: false
+        canFetchAgain: false,
+        foundError: false,
+        errorMessage: ""
       });
     }
   };
@@ -647,14 +687,14 @@ class App extends Component {
       characterIds: [], //titan 0,hunter 1 , warlock 2 ,
       classHashes: [0, 0, 0],
       activitiesList: [],
-      activitiesListCount: 0,
+      activitiesListCount: [0, 0],
       hasFoundMatches: false,
       matchEntryPGCR: [{}],
       matchesToShow: [{}],
       previousFirstName: "",
       previousSecondName: "",
       fetchStartEnd: [0, 500],
-      canFetchAgain: true,
+      canFetchAgain: false,
       previousCharacter: 0,
       foundError: false,
       errorMessage: "",
