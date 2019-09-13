@@ -5,6 +5,10 @@ import Logo from "./Components/Logo";
 import StatBoxs from "./Components/StatBoxs";
 
 const axios = require("axios");
+const pLimit = require("p-limit");
+
+// Example Concurrency of 3 promise at once
+const limit = pLimit(3);
 
 class App extends Component {
   state = {
