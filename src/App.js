@@ -9,6 +9,7 @@ const pLimit = require("p-limit");
 
 // Example Concurrency of 3 promise at once
 const limit = pLimit(3);
+var tre = 3;
 
 class App extends Component {
   state = {
