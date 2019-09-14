@@ -8,8 +8,7 @@ const axios = require("axios");
 const pLimit = require("p-limit");
 
 // Example Concurrency of 3 promise at once
-const limit = pLimit(3);
-var tre = 3;
+const limit = pLimit(500);
 
 class App extends Component {
   state = {
@@ -299,7 +298,8 @@ class App extends Component {
     ) {
       this.setState({
         firstMembershipId: response.data.Response[0].membershipId,
-        secondMembershipId: response2.data.Response[0].membershipId
+        secondMembershipId: response2.data.Response[0].membershipId,
+        membershipType: response.data.Response[0].membershipType
       });
     } else {
       if (response.data.Response.length <= 0) {
@@ -312,7 +312,9 @@ class App extends Component {
 
   getProfile = async settings => {
     const fetchUrl =
-      "https://www.bungie.net/Platform/Destiny2/4/Profile/" +
+      "https://www.bungie.net/Platform/Destiny2/" +
+      this.state.membershipType +
+      "/Profile/" +
       this.state.firstMembershipId +
       "/?components=100,200";
 
@@ -321,8 +323,6 @@ class App extends Component {
 
     this.setState({
       characterIds: response.data.Response.profile.data.characterIds,
-      membershipType:
-        response.data.Response.profile.data.userInfo.membershipType,
       classHashes: Object.keys(response.data.Response.characters.data).map(
         e => {
           return response.data.Response.characters.data[e].classHash;
@@ -468,72 +468,27 @@ class App extends Component {
   getPostGameCarnageReport = async (start, end, settings) => {
     var arr = this.state.activitiesList;
 
-    if (arr.length < 250 && arr.length > 0) {
-      var requests = arr
-        .filter(e => {
-          return e !== "error";
-        })
-        .map(f => {
-          if (f) {
-            return this.pgcrFetch(f.activityDetails.instanceId, settings).then(
-              a => {
-                return a;
-              }
-            );
-          } else {
-            return "error";
-          }
+    var requests = arr
+      .filter(e => {
+        return e !== "error";
+      })
+      .map(f => {
+        return limit(() => {
+          return this.pgcrFetch(f.activityDetails.instanceId, settings).then(
+            a => {
+              return a;
+            }
+          );
         });
-
-      var response = await Promise.all(requests);
-      console.log(response);
-      this.setState({
-        matchEntryPGCR: response,
-        canFetchAgain: false
       });
-    } else {
-      this.setState({ canFetchAgain: true });
-      var preV = start;
-      var curr = preV + 250;
-      console.log(preV, curr);
 
-      for (let i = 0; i < 3; i++) {
-        var requests2 = [...arr];
-        requests2 = arr.slice(preV, curr).map(e => {
-          if (e) {
-            return this.pgcrFetch(e.activityDetails.instanceId, settings).then(
-              a => {
-                return a;
-              }
-            );
-          } else {
-            return "error";
-          }
-        });
+    // Only one promise is run at once
+    var response = await Promise.all(requests);
 
-        const response = await Promise.all(requests2);
-        console.log(response);
-
-        this.setState(prevState => ({
-          matchEntryPGCR: [...prevState.matchEntryPGCR, response]
-        }));
-        if (response.length < 250) {
-          console.log("less than 200 find");
-          var arr1d = [].concat(...this.state.matchEntryPGCR).slice(1);
-          this.setState({ canFetchAgain: false, matchEntryPGCR: arr1d });
-          break;
-        } else {
-          preV = preV + 250;
-          curr = curr + 250;
-
-          if (curr === this.state.fetchStartEnd[1] + 250) {
-            var ar1d = [].concat(...this.state.matchEntryPGCR).slice(1);
-            this.setState({ matchEntryPGCR: ar1d });
-            break;
-          }
-        }
-      }
-    }
+    this.setState({
+      matchEntryPGCR: response,
+      canFetchAgain: false
+    });
   };
 
   pgcrFetch = async (activityId, settings) => {
@@ -542,6 +497,7 @@ class App extends Component {
       activityId +
       "/";
     var response = await axios.get(fetchUrl, settings);
+
     return {
       data: response.data.Response
     };
