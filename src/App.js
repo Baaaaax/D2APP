@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+
 import "./App.scss";
 import Form from "./Components/Form";
 import Logo from "./Components/Logo";
@@ -6,6 +7,9 @@ import StatBoxs from "./Components/StatBoxs";
 
 const axios = require("axios");
 const pLimit = require("p-limit");
+
+require("dotenv").config();
+const apiKey = process.env.REACT_APP_X_API_KEY;
 
 // Example Concurrency of 3 promise at once
 const limit = pLimit(500);
@@ -48,7 +52,7 @@ class App extends Component {
         var settings = {
           method: "GET",
           headers: {
-            "x-api-key": "cc8fc21c337a4399b94e9e11e7d908b8"
+            "x-api-key": apiKey
           }
         };
 
