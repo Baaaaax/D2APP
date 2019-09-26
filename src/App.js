@@ -19,9 +19,7 @@ class App extends Component {
     // 0 = Full fetch , 1 = character or isPrivate change
     // 2 = only check second input fastfetch
     typeFetch: 0,
-    fullFetch: true,
     btnFetchCount: 0,
-    fetchStartEnd: [0, 500],
     isLoading: false,
     isPrivate: false,
     firstInputValue: "",
@@ -33,7 +31,7 @@ class App extends Component {
     membershipType: 0,
     characterIds: [], //titan 0,hunter 1 , warlock 2 ,
     classHashes: [0, 0, 0],
-    activitiesList: [],
+    activitiesListId: [],
     activitiesListCount: [0, 0], //0 all , 1 private matches
     hasFoundMatches: false,
     matchEntryPGCR: [{}],
@@ -160,91 +158,36 @@ class App extends Component {
       secondInputValue,
       selectedCharacter,
       isPrivate,
-      fetchStartEnd,
       activitiesListCount
     } = this.state;
 
     var actListCount = isPrivate
       ? activitiesListCount[1]
       : activitiesListCount[0];
-    if (this.state.fullFetch) {
-      switch (typeFetch) {
-        case 0:
-          await this.setPreviousBehaviour(
-            firstInputValue,
-            secondInputValue,
-            selectedCharacter,
-            isPrivate
-          );
-          await this.getMembershipsId(
-            firstInputValue,
-            secondInputValue,
-            settings
-          );
-          if (!this.state.foundError) {
-            await this.getProfile(settings);
-            await this.getHistoricalStats(settings);
-            await this.getActivityHistory(settings);
 
-            if (this.state.hasFoundMatches) {
-              await this.getPostGameCarnageReport(
-                fetchStartEnd[0],
-                fetchStartEnd[1],
-                settings
-              );
-              await this.checkIfPlayed();
-              if (
-                this.state.matchesToShow.length <= 1 &&
-                this.state.fetchStartEnd[1] >= actListCount
-              ) {
-                this.setState({
-                  foundError: false,
-                  errorMessage:
-                    this.state.firstInputValue +
-                    " never played against " +
-                    this.state.secondInputValue
-                });
-              }
-            }
-          }
-          break;
-
-        case 1:
-          await this.setPreviousBehaviour(
-            firstInputValue,
-            secondInputValue,
-            selectedCharacter,
-            isPrivate
-          );
+    switch (typeFetch) {
+      case 0: //CASE FULL FETCH
+        await this.setPreviousBehaviour(
+          firstInputValue,
+          secondInputValue,
+          selectedCharacter,
+          isPrivate
+        );
+        await this.getMembershipsId(
+          firstInputValue,
+          secondInputValue,
+          settings
+        );
+        if (!this.state.foundError) {
+          // If the username given exist
+          await this.getProfile(settings);
           await this.getHistoricalStats(settings);
           await this.getActivityHistory(settings);
+
           if (this.state.hasFoundMatches) {
-            await this.getPostGameCarnageReport(
-              fetchStartEnd[0],
-              fetchStartEnd[1],
-              settings
-            );
+            await this.getPostGameCarnageReport(settings);
             await this.checkIfPlayed();
-          }
-          break;
-        case 2:
-          await this.setPreviousBehaviour(
-            firstInputValue,
-            secondInputValue,
-            selectedCharacter,
-            isPrivate
-          );
-          await this.getMembershipsId(
-            firstInputValue,
-            secondInputValue,
-            settings
-          );
-          if (!this.state.foundError) {
-            await this.checkIfPlayed();
-            if (
-              this.state.matchesToShow.length <= 1 &&
-              this.state.fetchStartEnd[1] >= actListCount
-            ) {
+            if (this.state.matchesToShow.length <= 1) {
               this.setState({
                 foundError: false,
                 errorMessage:
@@ -254,28 +197,49 @@ class App extends Component {
               });
             }
           }
+        }
+        break;
 
-          break;
-      }
-    } else {
-      await this.getPostGameCarnageReport(
-        fetchStartEnd[0],
-        fetchStartEnd[1],
-        settings
-      );
-      await this.checkIfPlayed();
-      if (
-        this.state.matchesToShow.length <= 1 &&
-        this.state.fetchStartEnd[1] >= actListCount
-      ) {
-        this.setState({
-          foundError: true,
-          errorMessage:
-            this.state.firstInputValue +
-            " never played against " +
-            this.state.secondInputValue
-        });
-      }
+      case 1:
+        await this.setPreviousBehaviour(
+          firstInputValue,
+          secondInputValue,
+          selectedCharacter,
+          isPrivate
+        );
+        await this.getHistoricalStats(settings);
+        await this.getActivityHistory(settings);
+        if (this.state.hasFoundMatches) {
+          await this.getPostGameCarnageReport(settings);
+          await this.checkIfPlayed();
+        }
+        break;
+      case 2:
+        await this.setPreviousBehaviour(
+          firstInputValue,
+          secondInputValue,
+          selectedCharacter,
+          isPrivate
+        );
+        await this.getMembershipsId(
+          firstInputValue,
+          secondInputValue,
+          settings
+        );
+        if (!this.state.foundError) {
+          await this.checkIfPlayed();
+          if (this.state.matchesToShow.length <= 1) {
+            this.setState({
+              foundError: false,
+              errorMessage:
+                this.state.firstInputValue +
+                " never played against " +
+                this.state.secondInputValue
+            });
+          }
+        }
+
+        break;
     }
   };
   getMembershipsId = async (firstInputName, secondInputName, settings) => {
@@ -403,7 +367,9 @@ class App extends Component {
     if (arr.length <= 200) {
       const res = await this.activityFetch(settings, 0, this.state.isPrivate);
       this.setState({
-        activitiesList: res.data.Response.activities,
+        activitiesListId: res.data.Response.activities.map(e => {
+          return e.activityDetails.instanceId;
+        }),
         hasFoundMatches: true
       });
     } else {
@@ -422,16 +388,19 @@ class App extends Component {
       });
 
       const response = await Promise.all(req);
+      console.log("check here", response);
 
       response.forEach(e => {
         this.setState(prevState => ({
-          activitiesList: [
-            ...prevState.activitiesList,
-            e.data.Response.activities
+          activitiesListId: [
+            ...prevState.activitiesListId,
+            e.data.Response.activities.map(f => {
+              return f.activityDetails.instanceId;
+            })
           ]
         }));
       });
-      var arr1d = [].concat(...this.state.activitiesList);
+      var arr1d = [].concat(...this.state.activitiesListId);
       if ((!arr1d[0], !arr1d[1], !arr1d[2])) {
         // check if we finded matches
         console.log("no matches found");
@@ -439,7 +408,7 @@ class App extends Component {
         this.handleErrors(2, "");
       } else {
         this.setState({ hasFoundMatches: true });
-        this.setState({ activitiesList: arr1d });
+        this.setState({ activitiesListId: arr1d });
       }
     }
   };
@@ -469,8 +438,8 @@ class App extends Component {
     };
   };
 
-  getPostGameCarnageReport = async (start, end, settings) => {
-    var arr = this.state.activitiesList;
+  getPostGameCarnageReport = async settings => {
+    var arr = this.state.activitiesListId;
 
     var requests = arr
       .filter(e => {
@@ -478,11 +447,9 @@ class App extends Component {
       })
       .map(f => {
         return limit(() => {
-          return this.pgcrFetch(f.activityDetails.instanceId, settings).then(
-            a => {
-              return a;
-            }
-          );
+          return this.pgcrFetch(f, settings).then(a => {
+            return a;
+          });
         });
       });
 
@@ -571,8 +538,7 @@ class App extends Component {
             ) {
               console.log("changed character or IsPrivate");
               this.setState({
-                fetchStartEnd: [0, 500],
-                activitiesList: [],
+                activitiesListId: [],
                 matchEntryPGCR: [{}],
                 matchesToShow: [{}],
                 hasFoundMatches: false
@@ -610,24 +576,11 @@ class App extends Component {
     document.querySelector(".loading-inner").style.opacity = 1;
   };
 
-  handleNext500Fetch = () => {
-    this.setState({
-      fullFetch: false,
-      fetchStartEnd: [
-        this.state.fetchStartEnd[0] + 500,
-        this.state.fetchStartEnd[1] + 500
-      ],
-
-      matchEntryPGCR: [{}],
-      isLoading: true
-    });
-  };
-
   handleGoBack = fullReset => {
     document.querySelector(".loading-inner").style.opacity = 0;
     if (fullReset) {
       this.setState({
-        activitiesList: [],
+        activitiesListId: [],
         matchEntryPGCR: [{}],
         canFetchAgain: false,
         foundError: false,
@@ -645,20 +598,18 @@ class App extends Component {
   handleResetState = () => {
     this.setState({
       typeFetch: 0,
-      fullFetch: true,
       firstMembershipId: "",
       secondMembershipId: "",
       membershipType: 0,
       characterIds: [], //titan 0,hunter 1 , warlock 2 ,
       classHashes: [0, 0, 0],
-      activitiesList: [],
+      activitiesListId: [],
       activitiesListCount: [0, 0],
       hasFoundMatches: false,
       matchEntryPGCR: [{}],
       matchesToShow: [{}],
       previousFirstName: "",
       previousSecondName: "",
-      fetchStartEnd: [0, 500],
       canFetchAgain: false,
       previousCharacter: 0,
       foundError: false,

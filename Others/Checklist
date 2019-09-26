@@ -1,11 +1,13 @@
- - Make it Responsive.
- - Fix same username for multi platforms.
+ 
+ 
+ 
  - Clean Up the code.
    - Search for redundant code
    - Check for more reasonable logics
- - Handle all the errors
+ - Fix same username for multi platforms.
+ - Handle all the errors and change it
    - Like Cors Police and NET ERR
-
+ - Make it Responsive. 
  -
  -
  -
