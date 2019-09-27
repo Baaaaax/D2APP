@@ -1,6 +1,6 @@
  
  
- 
+ - DO the check on list count on the gethistory to see if there are matches and handle both private and allpvp in array state
  - Clean Up the code.
    - Search for redundant code
    - Check for more reasonable logics

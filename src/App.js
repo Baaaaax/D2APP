@@ -33,13 +33,10 @@ class App extends Component {
     classHashes: [0, 0, 0],
     activitiesListId: [],
     activitiesListCount: [0, 0], //0 all , 1 private matches
-    hasFoundMatches: false,
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
     selectedCharacter: 0,
     previousCharacter: 0,
-    moreMatchesToShow: false,
-    canFetchAgain: false,
     foundError: false,
     errorMessage: ""
   };
@@ -55,9 +52,7 @@ class App extends Component {
         };
 
         this.FetchBehaviour(settings).then(r => {
-          if (this.state.matchesToShow.length > 1) {
-            document.querySelector(".loading-inner").style.opacity = 0;
-          }
+          document.querySelector(".loading-inner").style.opacity = 0;
           this.setState({ isLoading: false });
         }); //"auriel#21174" tara#22686
       }
@@ -85,6 +80,12 @@ class App extends Component {
                     onIsPrivateChange={this.onIsPrivateChange}
                   />
 
+                  {!this.state.isLoading && this.state.foundError && (
+                    <div className="container text-center mt-4">
+                      <h3>{this.state.errorMessage}</h3>
+                    </div>
+                  )}
+
                   {this.state.matchesToShow.length > 1 && (
                     <StatBoxs
                       matchesToShow={this.state.matchesToShow}
@@ -92,7 +93,6 @@ class App extends Component {
                       secondMembershipId={this.state.secondMembershipId}
                       handleNext500Fetch={this.handleNext500Fetch}
                       activitiesListCount={this.state.activitiesListCount}
-                      canFetchAgain={this.state.canFetchAgain}
                     />
                   )}
 
@@ -100,36 +100,6 @@ class App extends Component {
                     {this.state.isLoading && (
                       <div className="centered-spinner">
                         <div className="cm-spinner"></div>
-                      </div>
-                    )}
-                    {!this.state.isLoading &&
-                      this.state.matchesToShow.length <= 1 &&
-                      this.state.canFetchAgain &&
-                      !this.state.foundError && (
-                        <div className="centered-spinner">
-                          <p>No matches found...</p>
-                          <button
-                            type="button"
-                            className="nxt-mtc-btn"
-                            onClick={this.handleNext500Fetch}
-                          >
-                            Search next 500..
-                          </button>
-                        </div>
-                      )}
-
-                    {!this.state.isLoading && this.state.foundError && (
-                      <div className="centered-spinner">
-                        <p>{this.state.errorMessage}</p>
-                        <button
-                          type="button"
-                          className="nxt-mtc-btn"
-                          onClick={() => {
-                            return this.handleGoBack(false);
-                          }}
-                        >
-                          Go back..
-                        </button>
                       </div>
                     )}
                   </div>
@@ -157,13 +127,8 @@ class App extends Component {
       firstInputValue,
       secondInputValue,
       selectedCharacter,
-      isPrivate,
-      activitiesListCount
+      isPrivate
     } = this.state;
-
-    var actListCount = isPrivate
-      ? activitiesListCount[1]
-      : activitiesListCount[0];
 
     switch (typeFetch) {
       case 0: //CASE FULL FETCH
@@ -182,20 +147,23 @@ class App extends Component {
           // If the username given exist
           await this.getProfile(settings);
           await this.getHistoricalStats(settings);
-          await this.getActivityHistory(settings);
 
-          if (this.state.hasFoundMatches) {
+          let bool = !isPrivate && this.state.activitiesListCount[0] >= 1;
+          let bool2 = isPrivate && this.state.activitiesListCount[1] >= 1;
+
+          if (bool || bool2) {
+            console.log("inside the bool");
+            await this.getActivityHistory(settings);
             await this.getPostGameCarnageReport(settings);
             await this.checkIfPlayed();
             if (this.state.matchesToShow.length <= 1) {
-              this.setState({
-                foundError: false,
-                errorMessage:
-                  this.state.firstInputValue +
-                  " never played against " +
-                  this.state.secondInputValue
-              });
+              this.handleErrors(
+                2,
+                `${firstInputValue} never played against ${secondInputValue}`
+              );
             }
+          } else {
+            this.handleErrors(2, "No matches found");
           }
         }
         break;
@@ -208,11 +176,27 @@ class App extends Component {
           isPrivate
         );
         await this.getHistoricalStats(settings);
-        await this.getActivityHistory(settings);
-        if (this.state.hasFoundMatches) {
+
+        let bool =
+          !this.state.isPrivate && this.state.activitiesListCount[0] >= 1;
+        let bool2 =
+          this.state.isPrivate && this.state.activitiesListCount[1] >= 1;
+        console.log(bool, bool2);
+
+        if (bool || bool2) {
+          await this.getActivityHistory(settings);
           await this.getPostGameCarnageReport(settings);
           await this.checkIfPlayed();
+          if (this.state.matchesToShow.length <= 1) {
+            this.handleErrors(
+              2,
+              `${firstInputValue} never played against ${secondInputValue}`
+            );
+          }
+        } else {
+          this.handleErrors(2, "No matches found..");
         }
+
         break;
       case 2:
         await this.setPreviousBehaviour(
@@ -229,13 +213,10 @@ class App extends Component {
         if (!this.state.foundError) {
           await this.checkIfPlayed();
           if (this.state.matchesToShow.length <= 1) {
-            this.setState({
-              foundError: false,
-              errorMessage:
-                this.state.firstInputValue +
-                " never played against " +
-                this.state.secondInputValue
-            });
+            this.handleErrors(
+              2,
+              `${firstInputValue} never played against ${secondInputValue}`
+            );
           }
         }
 
@@ -349,13 +330,63 @@ class App extends Component {
 
     const response = await axios.get(fetchUrl, settings);
     console.log("hisroty ", response);
-    this.setState({
-      activitiesListCount: [
-        response.data.Response.allPvP.allTime.activitiesEntered.basic.value,
-        response.data.Response.privateMatches.allTime.activitiesEntered.basic
-          .value
-      ]
-    });
+    this.checkForEmptyMatches(response);
+  };
+
+  checkForEmptyMatches = response => {
+    let bool =
+      Object.entries(response.data.Response.allPvP).length === 0 &&
+      response.data.Response.allPvP.constructor === Object;
+    let bool2 =
+      Object.entries(response.data.Response.privateMatches).length === 0 &&
+      response.data.Response.privateMatches.constructor === Object;
+
+    console.log("inside check for empty ", bool, bool2);
+
+    if (bool) {
+      if (!this.state.isPrivate) {
+        this.setState({
+          activitiesListCount: [
+            response.data.Response.allPvP.allTime.activitiesEntered.basic.value,
+            0
+          ]
+        });
+        this.handleErrors(2, "No matches found..");
+      } else {
+        this.setState({
+          activitiesListCount: [
+            0,
+            response.data.Response.privateMatches.allTime.activitiesEntered
+              .basic.value
+          ]
+        });
+      }
+    } else if (bool2) {
+      if (this.state.isPrivate) {
+        this.setState({
+          activitiesListCount: [
+            response.data.Response.allPvP.allTime.activitiesEntered.basic.value,
+            0
+          ]
+        });
+        this.handleErrors(2, "No matches found..");
+      } else {
+        this.setState({
+          activitiesListCount: [
+            response.data.Response.allPvP.allTime.activitiesEntered.basic.value,
+            0
+          ]
+        });
+      }
+    } else {
+      this.setState({
+        activitiesListCount: [
+          response.data.Response.allPvP.allTime.activitiesEntered.basic.value,
+          response.data.Response.privateMatches.allTime.activitiesEntered.basic
+            .value
+        ]
+      });
+    }
   };
 
   getActivityHistory = async settings => {
@@ -369,8 +400,7 @@ class App extends Component {
       this.setState({
         activitiesListId: res.data.Response.activities.map(e => {
           return e.activityDetails.instanceId;
-        }),
-        hasFoundMatches: true
+        })
       });
     } else {
       var requests = [...arr];
@@ -401,15 +431,7 @@ class App extends Component {
         }));
       });
       var arr1d = [].concat(...this.state.activitiesListId);
-      if ((!arr1d[0], !arr1d[1], !arr1d[2])) {
-        // check if we finded matches
-        console.log("no matches found");
-        this.setState({ hasFoundMatches: false });
-        this.handleErrors(2, "");
-      } else {
-        this.setState({ hasFoundMatches: true });
-        this.setState({ activitiesListId: arr1d });
-      }
+      this.setState({ activitiesListId: arr1d });
     }
   };
 
@@ -453,12 +475,10 @@ class App extends Component {
         });
       });
 
-    // Only one promise is run at once
     var response = await Promise.all(requests);
 
     this.setState({
-      matchEntryPGCR: response,
-      canFetchAgain: false
+      matchEntryPGCR: response
     });
   };
 
@@ -541,7 +561,7 @@ class App extends Component {
                 activitiesListId: [],
                 matchEntryPGCR: [{}],
                 matchesToShow: [{}],
-                hasFoundMatches: false
+                activitiesListCount: [0, 0]
               });
               this.settingLoadingState(1);
             } // else they are all the same we return
@@ -576,25 +596,6 @@ class App extends Component {
     document.querySelector(".loading-inner").style.opacity = 1;
   };
 
-  handleGoBack = fullReset => {
-    document.querySelector(".loading-inner").style.opacity = 0;
-    if (fullReset) {
-      this.setState({
-        activitiesListId: [],
-        matchEntryPGCR: [{}],
-        canFetchAgain: false,
-        foundError: false,
-        errorMessage: ""
-      });
-    } else {
-      this.setState({
-        canFetchAgain: false,
-        foundError: false,
-        errorMessage: ""
-      });
-    }
-  };
-
   handleResetState = () => {
     this.setState({
       typeFetch: 0,
@@ -605,12 +606,10 @@ class App extends Component {
       classHashes: [0, 0, 0],
       activitiesListId: [],
       activitiesListCount: [0, 0],
-      hasFoundMatches: false,
       matchEntryPGCR: [{}],
       matchesToShow: [{}],
       previousFirstName: "",
       previousSecondName: "",
-      canFetchAgain: false,
       previousCharacter: 0,
       foundError: false,
       errorMessage: "",
@@ -622,6 +621,7 @@ class App extends Component {
   };
 
   handleErrors = (typeErr, messErr) => {
+    // CASE 1 : NO USERANAME FOUND , CASE 2 NO MATCH FOUND
     switch (typeErr) {
       case 1:
         this.setState({
@@ -634,26 +634,9 @@ class App extends Component {
         this.setState({
           isLoading: false,
           foundError: true,
-          errorMessage: "No matches found.."
+          errorMessage: messErr
         });
     }
   };
-
-  // handleClickNextPage = () => {
-  //   var settings = {
-  //     method: "GET",
-  //     headers: {
-  //       "x-api-key": "cc8fc21c337a4399b94e9e11e7d908b8"
-  //     }
-  //   };
-  //   this.setState({ isLoading: true });
-  //   this.setState({ noMatchFoundBool: false });
-  //   this.setState({ isUpdating: true });
-  //   this.setState({ matchesToShow: [{}] });
-  //   this.setState({ matchEntryPGCR: [{}] });
-  //   this.getActivityHistory(settings);
-  //   this.setState({ currentPage: this.state.currentPage + 1 });
-  //   };
-  //}
 }
 export default App;

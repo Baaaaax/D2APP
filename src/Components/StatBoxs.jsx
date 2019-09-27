@@ -12,27 +12,15 @@ class StatBoxs extends Component {
   };
 
   render() {
-    const { handleNext500Fetch, canFetchAgain, isLoading } = this.props;
     return (
-      <div className="container SB">
-        <button
-          type="button"
-          className="btn btn-primary btn-block"
-          onClick={handleNext500Fetch}
-          disabled={!canFetchAgain || isLoading}
-        >
-          {canFetchAgain ? "Next 500 matches" : "No more matches.."}
-        </button>
-
-        <div
-          className="container main-statsbox"
-          style={{
-            minWidth: "430",
-            borderColor: this.state.isPlayer ? "#a3e725e3" : "#f44336"
-          }}
-        >
-          <Flickity>{this.carouselBehaviour()}</Flickity>
-        </div>
+      <div
+        className="container main-statsbox"
+        style={{
+          minWidth: "430",
+          borderColor: this.state.isPlayer ? "#a3e725e3" : "#f44336"
+        }}
+      >
+        <Flickity>{this.carouselBehaviour()}</Flickity>
       </div>
     );
   }
