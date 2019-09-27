@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-
+import MediaQuery from "react-responsive";
 import "./App.scss";
 import Form from "./Components/Form";
 import Logo from "./Components/Logo";
@@ -18,25 +18,25 @@ class App extends Component {
   state = {
     // 0 = Full fetch , 1 = character or isPrivate change
     // 2 = only check second input fastfetch
-    typeFetch: 0,
-    btnFetchCount: 0,
     isLoading: false,
     isPrivate: false,
+    typeFetch: 0,
+    btnFetchCount: 0,
     firstInputValue: "",
     secondInputValue: "",
-    previousFirstName: "",
-    previousSecondName: "",
+    previousFirstValue: "",
+    previousSecondValue: "",
+    selectedCharacter: 0,
+    previousCharacter: 0,
     firstMembershipId: "",
     secondMembershipId: "",
     membershipType: 0,
     characterIds: [], //titan 0,hunter 1 , warlock 2 ,
     classHashes: [0, 0, 0],
-    activitiesListId: [],
     activitiesListCount: [0, 0], //0 all , 1 private matches
+    activitiesListId: [],
     matchEntryPGCR: [{}],
     matchesToShow: [{}],
-    selectedCharacter: 0,
-    previousCharacter: 0,
     foundError: false,
     errorMessage: ""
   };
@@ -60,22 +60,25 @@ class App extends Component {
   }
 
   render() {
+    let width = window.innerWidth;
     return (
       <div>
         <div className="wrapper">
           <div className="main">
-            <div className="container" style={{ maxWidth: 1700 }}>
+            <div className="container">
               <div className="row">
-                <div className="col-5 title-container">
-                  <Logo />
-                </div>
-                <div className="col-7 form-container loading-outer">
+                <MediaQuery minDeviceWidth={768}>
+                  <div className="col-sm-12 col-md-5 col-lg-5  title-container">
+                    <Logo />
+                  </div>
+                </MediaQuery>
+
+                <div className="col-md-7 col-lg-7 form-container loading-outer">
                   <Form
                     onFInputChange={this.onFInputChange}
                     onSInputChange={this.onSInputChange}
                     handleClickFetch={this.handleClickFetch}
                     isLoading={this.state.isLoading}
-                    hasFoundResults={this.state.hasFoundResults}
                     onCharacterChange={this.onCharacterChange}
                     onIsPrivateChange={this.onIsPrivateChange}
                   />
@@ -91,7 +94,6 @@ class App extends Component {
                       matchesToShow={this.state.matchesToShow}
                       firstMembershipId={this.state.firstMembershipId}
                       secondMembershipId={this.state.secondMembershipId}
-                      handleNext500Fetch={this.handleNext500Fetch}
                       activitiesListCount={this.state.activitiesListCount}
                     />
                   )}
@@ -114,8 +116,8 @@ class App extends Component {
 
   setPreviousBehaviour = async (name, secName, char, isPriv) => {
     this.setState({
-      previousFirstName: name,
-      previousSecondName: secName,
+      previousFirstValue: name,
+      previousSecondValue: secName,
       previousCharacter: char,
       previousIsPrivate: isPriv
     });
@@ -396,6 +398,7 @@ class App extends Component {
     var arr = Array(actListCount).fill(0);
 
     if (arr.length <= 200) {
+      //If there are less than 200 matches
       const res = await this.activityFetch(settings, 0, this.state.isPrivate);
       this.setState({
         activitiesListId: res.data.Response.activities.map(e => {
@@ -406,6 +409,7 @@ class App extends Component {
       var requests = [...arr];
 
       if (requests.length % 200 === 0) {
+        // If the matches are a multiply of 200, such as 400 ....
         console.log("we are here");
         requests = arr.slice(0, arr.length / 200);
       } else {
@@ -548,7 +552,7 @@ class App extends Component {
         this.settingLoadingState(0);
       } else {
         // if the first username remain the same
-        if (this.state.previousFirstName === this.state.firstInputValue) {
+        if (this.state.previousFirstValue === this.state.firstInputValue) {
           // if the second username remain the same
           if (this.state.previousSecondName === this.state.secondInputValue) {
             // if the character changes or IsPrivate changes
@@ -564,20 +568,21 @@ class App extends Component {
                 activitiesListCount: [0, 0]
               });
               this.settingLoadingState(1);
-            } // else they are all the same we return
-            else {
+            } else {
+              // else they are all the same we return
               console.log("all same");
+              this.handleErrors(2, "Change something..");
               return;
             }
           }
-          // else only the second username changes , we do a fastFetch
+          //  only the second username changes , we do a fastFetch
           else {
             console.log("only the second changes , we do a fast fetch");
             this.setState({ matchesToShow: [{}] });
             this.settingLoadingState(2);
           }
         }
-        // else the first username changed , we do a full fetch
+        //  the first username changed , we do a full fetch
         else {
           console.log("first input changed , we do a full fetch");
           this.handleResetState();
@@ -608,8 +613,8 @@ class App extends Component {
       activitiesListCount: [0, 0],
       matchEntryPGCR: [{}],
       matchesToShow: [{}],
-      previousFirstName: "",
-      previousSecondName: "",
+      previousFirstValue: "",
+      previousSecondValue: "",
       previousCharacter: 0,
       foundError: false,
       errorMessage: "",
@@ -621,7 +626,7 @@ class App extends Component {
   };
 
   handleErrors = (typeErr, messErr) => {
-    // CASE 1 : NO USERANAME FOUND , CASE 2 NO MATCH FOUND
+    // CASE 1 : NO USERANAME FOUND , CASE 2 NO MATCH FOUND/NEVER PLAYED AGAINST
     switch (typeErr) {
       case 1:
         this.setState({

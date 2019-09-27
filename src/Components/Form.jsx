@@ -51,7 +51,7 @@ const Form = props => {
             </div>
           </div>
           <div className="row justify-content-around">
-            <div className="col-4 char-cont">
+            <div className="col-lg-4 col-md-12">
               <div className="row">
                 <div className="col-4">
                   <label className="logo-label">
@@ -97,7 +97,7 @@ const Form = props => {
                 </div>
               </div>
             </div>
-            <div className="col-4" style={{ paddingTop: "2%" }}>
+            <div className="col-lg-4 pt-lg-2 mb-md-3">
               <input
                 type="checkbox"
                 id="cbx"

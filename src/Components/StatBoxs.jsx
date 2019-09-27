@@ -7,8 +7,7 @@ import "../scripts/flickity.css";
 class StatBoxs extends Component {
   state = {
     matchesToShowIndexes: [1, 4],
-    threeMatches: [],
-    isPlayer: true // player:true enemny:false
+    isPlayer: true
   };
 
   render() {
